@@ -3,4 +3,7 @@
 
 # python artifacts
 *.py[abc]
-*/__pycache__
+**/__pycache__
+
+# pytest artifacts
+**/.pytest_cache

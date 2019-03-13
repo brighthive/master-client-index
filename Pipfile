@@ -9,6 +9,8 @@ pycodestyle = "*"
 flask = "*"
 flask-restful = "*"
 gunicorn = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
 
 [dev-packages]
 expects = "*"
