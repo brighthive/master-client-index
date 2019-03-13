@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 pycodestyle = "*"
 "autopep8" = "*"
+flask = "*"
+flask-restful = "*"
+gunicorn = "*"
 
 [dev-packages]
 expects = "*"
