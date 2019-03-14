@@ -14,7 +14,7 @@ class VersionedResource(Resource):
     """
 
     def __init__(self):
-        super.__init__()
+        super().__init__()
 
     def get_api_version(self, headers):
         """Retrieve the API version from the HTTP request header.
