@@ -1,7 +1,7 @@
 """API Healthcheck Resource
 
 This class represents a basic health check resource for providing clients with
-quick status on the status of the API.
+quick status of the API.
 
 """
 
