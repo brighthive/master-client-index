@@ -4,11 +4,20 @@ Handle user endpoint requests from the API.
 
 """
 
+from mci.id_factory import IDFactory
+
 
 class UserHandler(object):
     """User Handler
 
     """
+
+    def create_new_user(self):
+        """ Creates a new user. """
+        user_id = IDFactory.get_id()
+        return {
+            'user_id': user_id
+        }, 201
 
     def get_all_users(self):
         """ Retrireve all users. """

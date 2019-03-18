@@ -1,0 +1,39 @@
+{
+    "schema": [{
+            "field": "mci_id",
+            "type": "string",
+            "required": "false"
+        },
+        {
+            "field": "pairin_id",
+            "type": "integer",
+            "required": "false"
+        },
+        {
+            "field": "ssn",
+            "type": "integer",
+            "required": "false"
+        },
+        {
+            "field": "registration_date",
+            "type": "date",
+            "required": "true",
+            "format": "%Y-%m-%d"
+        },
+        {
+            "field": "first_name",
+            "type": "string",
+            "required": "true"
+        },
+        {
+            "field": "last_name",
+            "type": "string",
+            "required": "false"
+        },
+        {
+            "field": "middle_name",
+            "type": "string",
+            "required": "false"
+        }
+    ]
+}

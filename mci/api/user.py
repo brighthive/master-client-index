@@ -45,13 +45,13 @@ class UserResource(VersionedResource):
         return self.get_request_handler(request.headers).get_all_users()
 
     def post(self):
-        """ Handle GET request from API.
+        """ Handle POST request from API.
 
         Returns:
             dict: API health status.
 
         """
-        return self.get_request_handler(request.headers).get_health()
+        return self.get_request_handler(request.headers).create_new_user()
 
     def put(self):
         """ Handle GET request from API.
