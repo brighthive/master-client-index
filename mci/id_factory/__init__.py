@@ -1,1 +1,1 @@
-from mci.id_factory.id_factory import IDFactory
+from mci.id_factory.id_factory import MasterClientIDFactory

@@ -11,7 +11,7 @@ implement this feature with that need in mind.
 import uuid
 
 
-class IDFactory(object):
+class MasterClientIDFactory(object):
     """MCI ID Factory.
 
     """
