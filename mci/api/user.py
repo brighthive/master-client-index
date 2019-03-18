@@ -5,7 +5,7 @@ This class represents a user registered with the Master Client Index.
 """
 
 from flask import request
-from mci.api import VersionedResource
+from mci.api import VersionedResource, V1_0_0_UserHandler
 
 
 class UserResource(VersionedResource):
@@ -29,9 +29,9 @@ class UserResource(VersionedResource):
         api_version = self.get_api_version(headers)
 
         if api_version == '1.0.0':
-            request_handler = object
+            request_handler = V1_0_0_UserHandler()
         else:
-            request_handler = object
+            request_handler = V1_0_0_UserHandler()
 
         return request_handler
 
@@ -42,7 +42,7 @@ class UserResource(VersionedResource):
             dict: API health status.
 
         """
-        return self.get_request_handler(request.headers).get_health()
+        return self.get_request_handler(request.headers).get_all_users()
 
     def post(self):
         """ Handle GET request from API.
