@@ -17,5 +17,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 api = Api(app)
 
+if db:
+    import mci.db.models
+
 api.add_resource(HealthCheckResource, '/health', endpoint='healthcheck')
 api.add_resource(UserResource, '/users', endpoint='users')
