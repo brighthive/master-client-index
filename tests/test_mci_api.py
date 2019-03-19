@@ -14,10 +14,6 @@ class TestMCIAPI(object):
 
     """
 
-    @pytest.fixture
-    def test_client(self):
-        return app.test_client()
-
-    def test_health_check(self, test_client):
+    def test_health_check(self, database, test_client):
         response = test_client.get('/health')
         expect(response.status_code).to(be(200))

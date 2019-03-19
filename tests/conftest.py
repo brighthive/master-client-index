@@ -115,3 +115,8 @@ def database():
     setup_postgres_container()
     yield db
     teardown_postgres_container()
+
+
+@pytest.fixture
+def test_client(scope='module'):
+    return app.test_client()
