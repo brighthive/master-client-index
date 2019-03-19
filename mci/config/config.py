@@ -144,7 +144,7 @@ class DevelopmentConfig(Config):
 
     CONTAINER_NAME = 'postgres-dev'
     IMAGE_NAME = 'postgres'
-    IMAGE_VERSION = '11.1'
+    IMAGE_VERSION = '11.2'
     POSTGRES_DATABASE = 'master_client_index_dev'
     POSTGRES_PORT = 5432
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(
@@ -190,7 +190,7 @@ class TestConfig(Config):
 
     CONTAINER_NAME = 'postgres-test'
     IMAGE_NAME = 'postgres'
-    IMAGE_VERSION = '11.1'
+    IMAGE_VERSION = '11.2'
     POSTGRES_DATABASE = 'master_client_index_test'
     POSTGRES_PORT = 5433
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(
