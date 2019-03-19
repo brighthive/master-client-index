@@ -17,6 +17,7 @@ flask-migrate = "*"
 expects = "*"
 pytest = "*"
 pytest-cov = "*"
+docker = "*"
 
 [requires]
 python_version = "3.7"

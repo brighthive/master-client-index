@@ -14,13 +14,14 @@ class TestMCIDataStore(object):
 
     def test_create_new_subject(self, database):
         """Test the creation of a new MCI subject."""
+        print(database)
 
-        subject = Subject(
-            pairin_id=123456,
-            ssn=123456789,
-            registration_date=datetime.now(),
-            first_name='Jane',
-            last_name='Doe',
-            middle_name='Paulina',
-            mailing_address_id=1
-        )
+        # subject = Subject(
+        #     pairin_id=123456,
+        #     ssn=123456789,
+        #     registration_date=datetime.now(),
+        #     first_name='Jane',
+        #     last_name='Doe',
+        #     middle_name='Paulina',
+        #     mailing_address_id=1
+        # )
