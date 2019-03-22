@@ -6,6 +6,7 @@ quick status of the API.
 """
 
 from flask import request
+from brighthive_authlib import token_required
 from mci.api import VersionedResource, V1_0_0_HealthCheckHandler
 
 
@@ -36,6 +37,7 @@ class HealthCheckResource(VersionedResource):
 
         return request_handler
 
+    @token_required
     def get(self):
         """ Handle GET request from API.
 
