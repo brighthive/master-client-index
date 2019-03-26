@@ -12,13 +12,13 @@ gunicorn = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
+brighthive-authlib = "*"
 
 [dev-packages]
 expects = "*"
 pytest = "*"
 pytest-cov = "*"
 docker = "*"
-brighthive-authlib = "*"
 
 [requires]
 python_version = "3.7"
