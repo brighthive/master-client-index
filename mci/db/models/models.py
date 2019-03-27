@@ -165,8 +165,10 @@ class Individual(db.Model):
         db.Integer, db.ForeignKey(Address.id, ondelete='CASCADE'))
     gender_id = db.Column(db.Integer, db.ForeignKey(
         Gender.id, ondelete='CASCADE'))
-    ethnicity_and_race_id = db.Column(
-        db.Integer, db.ForeignKey(EthnicityRace.id, ondelete='CASCADE'))
+    # ethnicity_and_race_id = db.Column(
+    #     db.Integer, db.ForeignKey(EthnicityRace.id, ondelete='CASCADE'))
+    ethnicity_races = db.relationship(
+        'EthnicityRace', secondary='individual_ethnicity_race')
     education_level_id = db.Column(db.Integer, db.ForeignKey(
         EducationLevel.id, ondelete='CASCADE'))
     employment_status_id = db.Column(db.Integer, db.ForeignKey(
@@ -174,7 +176,7 @@ class Individual(db.Model):
     source_id = db.Column(db.Integer, db.ForeignKey(
         Source.id, ondelete='CASCADE'))
     dispositions = db.relationship(
-        'Disposition', secondary='IndividualDisposition')
+        'Disposition', secondary='individual_disposition')
 
     def __init__(self,
                  vendor_id=None,
@@ -185,7 +187,8 @@ class Individual(db.Model):
                  last_name=None,
                  date_of_birth=None,
                  email_address=None,
-                 telephone=None):
+                 telephone=None,
+                 dispositions=None):
         self.mci_id = MasterClientIDFactory.get_id()
         self.vendor_id = vendor_id
         self.ssn = ssn
@@ -203,6 +206,13 @@ class IndividualDisposition(db.Model):
         Individual.mci_id, ondelete='CASCADE'), nullable=False, primary_key=True)
     disposition_id = db.Column(db.Integer, db.ForeignKey(
         Disposition.id, ondelete='CASCADE'), nullable=False, primary_key=True)
+
+
+class IndividualEthnicityRace(db.Model):
+    individual_id = db.Column(db.String(40), db.ForeignKey(
+        Individual.mci_id, ondelete='CASCADE'), nullable=False, primary_key=True)
+    ethnicity_race_id = db.Column(db.Integer, db.ForeignKey(
+        EthnicityRace.id, ondelete='CASCADE'), nullable=False, primary_key=True)
 
 
 class Referral(db.Model):

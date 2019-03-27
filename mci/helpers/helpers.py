@@ -112,3 +112,17 @@ def validate_email(email_address):
         pass
 
     return is_valid
+
+
+def error_message(error_text: str, status_code=400):
+    """Generate an error message with a status code.
+
+    Args:
+        error_text (str): Error text to return with the message body.
+        status_code (int): HTTP status code to return.
+
+    Return
+        dict, int: Error message and HTTP status code.
+
+    """
+    return {'error': error_text}, status_code

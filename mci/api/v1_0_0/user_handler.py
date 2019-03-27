@@ -6,10 +6,12 @@ Handle user endpoint requests from the API.
 
 from collections import OrderedDict
 from datetime import datetime
+from sqlalchemy import func
 from mci.id_factory import MasterClientIDFactory
-from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace, Gender, Source
+from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace,\
+    Gender, Source, IndividualDisposition, Disposition
 from mci.app.app import db
-from mci.helpers import build_links, validate_email
+from mci.helpers import build_links, validate_email, error_message
 
 
 class UserHandler(object):
@@ -28,17 +30,11 @@ class UserHandler(object):
             'date_of_birth': False,
             'ssn': False
         }
-        address_id = None
-        gender_id = None
-        ethnicity_race_id = None
-        education_level_id = None
 
         try:
             user = user_object.json
         except Exception:
-            return {
-                'error': 'Malformed or empty JSON object found in request body.'
-            }, 400
+            return error_message('Malformed or empty JSON object found in request body.')
 
         new_user = Individual()
 
@@ -57,7 +53,7 @@ class UserHandler(object):
             if validate_email(user['email_address']):
                 new_user.email_address = user['email_address']
             else:
-                return {'error': 'Invalid Email Address format.'}
+                return error_message('Invalid Email Address format.')
         if 'telephone' in user.keys():
             new_user.telephone = user['telephone']
         if 'date_of_birth' in user.keys():
@@ -65,7 +61,7 @@ class UserHandler(object):
                 new_user.date_of_birth = datetime.strptime(
                     user['date_of_birth'], '%Y-%m-%d')
             except Exception:
-                return {'error': 'Invalid Date of Birth format.'}
+                return error_message('Invalid Date of Birth format.')
 
         # items that require lookup table queries
         if 'mailing_address' in user.keys():
@@ -81,28 +77,60 @@ class UserHandler(object):
                                                   country=new_address.country).first()
                 if address is not None:
                     address_id = address.id
+                    new_user.mailing_address_id = address.id
                     potential_match_criteria['address'] = True
                 else:
                     db.session.add(new_address)
                     db.session.commit()
-                    address_id = new_address.id
+                    new_user.mailing_address_id = new_address.id
             except Exception:
-                return {'error': 'Invalid mailing address format.'}, 400
+                return error_message('Invalid Mailing Address format.')
 
         if 'gender' in user.keys():
-            pass
+            gender = Gender.query.filter(func.lower(
+                Gender.gender) == func.lower(user['gender'])).first()
+            if gender is None:
+                return error_message('Invalid gender type specified.')
+            else:
+                new_user.gender_id = gender.id
 
         if 'ethnicity_race' in user.keys():
-            pass
+            ethnicity = EthnicityRace.query.filter(func.lower(
+                EthnicityRace.ethnicity_race) == func.lower(user['ethnicity_race'])).first()
+            if ethnicity is None:
+                return error_message('Invalid ethnicity/race type specifed.')
+            else:
+                new_user.ethnicity_and_race_id = ethnicity.id
 
         if 'education_level' in user.keys():
-            pass
+            education_level = EducationLevel.query.filter(func.lower(
+                EducationLevel.education_level) == func.lower(user['education_level'])).first()
+            if education_level is None:
+                return error_message('Invalid education level specified.')
+            else:
+                new_user.education_level_id = education_level.id
 
         if 'employment_status' in user.keys():
-            pass
+            employment_status = EmploymentStatus.query.filter(func.lower(
+                EmploymentStatus.employment_status) == func.lower(user['employment_status'])).first()
+            if employment_status is None:
+                return error_message('Invalid employment status type specified.')
+            else:
+                new_user.employment_status_id = employment_status.id
 
         if 'source' in user.keys():
-            pass
+            source = Source.query.filter(func.lower(
+                Source.source) == func.lower(user['source'])).first()
+            if source is None:
+                return error_message('Invalid source type specified.')
+            else:
+                new_user.source_id = source.id
+
+        if 'dispositions' in user.keys():
+            if not isinstance(user['dispositions'], list):
+                return error_message('User disposition must be an array.')
+            else:
+                new_user.dispositions.append()
 
         db.session.add(new_user)
         db.session.commit()
@@ -125,15 +153,11 @@ class UserHandler(object):
             offset = int(offset)
             limit = int(limit)
             if offset < 0 or limit < 0:
-                return {
-                    'error': 'Offset and Limit must be positive integers.'
-                }, 400
+                return error_message('Offset and Limit must be positive integers.')
             if limit > 100:
                 limit = 100
         except Exception:
-            return {
-                'error': 'Offset and Limit must be integers.'
-            }, 400
+            return error_message('Offset and Limit must be integers.')
 
         users = Individual.query.limit(limit).offset(offset)
         row_count = Individual.query.count()

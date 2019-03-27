@@ -1,2 +1,2 @@
 from mci.db.models.models import Individual, Address, Referral, Source, Gender,\
-    EthnicityRace, EducationLevel, EmploymentStatus
+    EthnicityRace, EducationLevel, EmploymentStatus, Disposition, IndividualDisposition
