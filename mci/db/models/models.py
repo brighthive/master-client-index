@@ -108,10 +108,10 @@ class EmploymentStatus(db.Model):
         self.employment_status = employment_status
 
 
-class CurrentStatus(db.Model):
-    """The individual's current status."""
-    id = db.Column(db.Integer, primary_key=True)
-    current_status = db.Column(db.String, nullable=False)
+# class CurrentStatus(db.Model):
+#     """The individual's current status."""
+#     id = db.Column(db.Integer, primary_key=True)
+#     current_status = db.Column(db.String, nullable=False)
 
 
 class Individual(db.Model):
@@ -219,17 +219,17 @@ class Referral(db.Model):
         self.date_referred = date_referred
 
 
-class IndividualCurrentStatus(db.Model):
-    """An individual's current status.
+# class IndividualCurrentStatus(db.Model):
+#     """An individual's current status.
 
-    Args:
-        mci_id (str): The individual's MCI ID.
+#     Args:
+#         mci_id (str): The individual's MCI ID.
 
-        current_status_id (int): The Curent Status ID.
+#         current_status_id (int): The Curent Status ID.
 
-    """
+#     """
 
-    mci_id = db.Column(db.String(40), db.ForeignKey(
-        Individual.mci_id, ondelete='CASCADE'), primary_key=True)
-    current_status_id = db.Column(
-        db.Integer, db.ForeignKey(CurrentStatus.id), primary_key=True)
+#     mci_id = db.Column(db.String(40), db.ForeignKey(
+#         Individual.mci_id, ondelete='CASCADE'), primary_key=True)
+#     current_status_id = db.Column(
+#         db.Integer, db.ForeignKey(CurrentStatus.id), primary_key=True)

@@ -9,7 +9,7 @@ from datetime import datetime
 from mci.id_factory import MasterClientIDFactory
 from mci.db.models import Individual, Address
 from mci.app.app import db
-from mci.helpers import build_links
+from mci.helpers import build_links, validate_email
 
 
 class UserHandler(object):
@@ -21,12 +21,17 @@ class UserHandler(object):
         """ Creates a new user. """
         errors = []
         potential_match_criteria = {
-            'name': False,
+            'first_name': False,
+            'last_name': False,
+            'email_address': False,
             'address': False,
             'date_of_birth': False,
             'ssn': False
         }
         address_id = None
+        gender_id = None
+        ethnicity_race_id = None
+        education_level_id = None
 
         try:
             user = user_object.json
@@ -43,20 +48,33 @@ class UserHandler(object):
         if 'ssn' in user.keys():
             new_user.ssn = user['ssn']
         if 'first_name' in user.keys():
-            new_user.first_name = user['first_name']
+            new_user.first_name = user['first_name'].title()
         if 'middle_name' in user.keys():
-            new_user.middle_name = user['middle_name']
+            new_user.middle_name = user['middle_name'].title()
         if 'last_name' in user.keys():
-            new_user.last_name = user['last_name']
+            new_user.last_name = user['last_name'].title()
+        if 'email_address' in user.keys():
+            if validate_email(user['email_address']):
+                new_user.email_address = user['email_address']
+            else:
+                return {'error': 'Invalid Email Address format.'}
+        if 'telephone' in user.keys():
+            new_user.telephone = user['telephone']
+        if 'date_of_birth' in user.keys():
+            try:
+                new_user.date_of_birth = datetime.strptime(
+                    user['date_of_birth'], '%Y-%m-%d')
+            except Exception:
+                return {'error': 'Invalid Date of Birth format.'}
 
-        # mailing address
+        # items that require lookup table queries
         if 'mailing_address' in user.keys():
             provided_address = user['mailing_address']
             try:
                 new_address = Address(provided_address['address'].title(),
                                       provided_address['city'].title(),
                                       provided_address['state'].upper(),
-                                      provided_address['zip'],
+                                      provided_address['postal_code'],
                                       provided_address['country'].upper())
                 address = Address.query.filter_by(address=new_address.address, city=new_address.city,
                                                   state=new_address.state, postal_code=new_address.postal_code,
@@ -70,22 +88,6 @@ class UserHandler(object):
                     address_id = new_address.id
             except Exception:
                 return {'error': 'Invalid mailing address format.'}, 400
-
-        # date of birth
-        if 'date_of_birth' in user.keys():
-            try:
-                new_user.date_of_birth = datetime.strptime(
-                    user['date_of_birth'], '%Y-%m-%d')
-                print(new_user.date_of_birth)
-            except Exception:
-                return {'error': 'Invalid Date of Birth format.'}
-
-        # other items
-        if 'email_address' in user.keys():
-            pass
-
-        if 'telephone' in user.keys():
-            pass
 
         if 'gender' in user.keys():
             pass

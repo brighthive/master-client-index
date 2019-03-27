@@ -1,6 +1,7 @@
 """General Purpose Helper Functions."""
 
 import math
+import re
 from collections import OrderedDict
 
 
@@ -88,3 +89,26 @@ def build_links(endpoint: str, offset: int, limit: int, rows: int):
     links.append(last)
 
     return links
+
+
+def validate_email(email_address):
+    """Rudimentary email address validator.
+
+    Args:
+        email_address (str): Email address string to validate.
+
+    Return:
+        bool: True if the email address is valid, False if not.
+
+    """
+    email_regex = re.compile(
+        r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
+    is_valid = False
+
+    try:
+        if email_regex.match(email_address):
+            is_valid = True
+    except Exception:
+        pass
+
+    return is_valid
