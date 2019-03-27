@@ -95,12 +95,16 @@ class UserHandler(object):
                 new_user.gender_id = gender.id
 
         if 'ethnicity_race' in user.keys():
-            ethnicity = EthnicityRace.query.filter(func.lower(
-                EthnicityRace.ethnicity_race) == func.lower(user['ethnicity_race'])).first()
-            if ethnicity is None:
-                return error_message('Invalid ethnicity/race type specifed.')
-            else:
-                new_user.ethnicity_and_race_id = ethnicity.id
+            if not isinstance(user['ethnicity_race'], list):
+                return error_message('Ethnicity/Race must be an array.')
+
+            for ethnicities_type in user['ethnicity_race']:
+                ethnicity = EthnicityRace.query.filter(func.lower(
+                    EthnicityRace.ethnicity_race) == func.lower(ethnicities_type)).first()
+                if ethnicity is None:
+                    return error_message('Invalid ethnicity/race type specifed.')
+                else:
+                    new_user.ethnicity_races.append(ethnicity)
 
         if 'education_level' in user.keys():
             education_level = EducationLevel.query.filter(func.lower(
@@ -126,11 +130,17 @@ class UserHandler(object):
             else:
                 new_user.source_id = source.id
 
-        if 'dispositions' in user.keys():
-            if not isinstance(user['dispositions'], list):
+        if 'disposition' in user.keys():
+            if not isinstance(user['disposition'], list):
                 return error_message('User disposition must be an array.')
             else:
-                new_user.dispositions.append()
+                for disposition_type in user['disposition']:
+                    disposition = Disposition.query.filter(func.lower(
+                        Disposition.disposition) == func.lower(disposition_type)).first()
+                    if disposition is None:
+                        return error_message('Invalid disposition type specifed.')
+                    else:
+                        new_user.dispositions.append(disposition)
 
         db.session.add(new_user)
         db.session.commit()
