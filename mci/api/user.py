@@ -42,7 +42,20 @@ class UserResource(VersionedResource):
             dict: API health status.
 
         """
-        return self.get_request_handler(request.headers).get_all_users()
+        offset = 0
+        limit = 20
+        args = request.args
+        try:
+            offset = request.args['offset']
+        except Exception:
+            pass
+
+        try:
+            limit = request.args['limit']
+        except Exception:
+            pass
+
+        return self.get_request_handler(request.headers).get_all_users(offset=offset, limit=limit)
 
     def post(self):
         """ Handle POST request from API.
@@ -51,7 +64,7 @@ class UserResource(VersionedResource):
             dict: API health status.
 
         """
-        return self.get_request_handler(request.headers).create_new_user()
+        return self.get_request_handler(request.headers).create_new_user(request)
 
     def put(self):
         """ Handle GET request from API.

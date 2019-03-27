@@ -4,8 +4,8 @@ This module contains all MCI database models.
 
 """
 
-from mci.app.app import db
 from mci.id_factory import MasterClientIDFactory
+from mci.app.app import db
 
 
 class Address(db.Model):
@@ -122,7 +122,7 @@ class Individual(db.Model):
         user, client, patient, and so on.
 
     Args:
-        pairin_id (str): PAIRIN ID (if submitted via PAIRIN app).
+        vendor_id (str): Internal identifier provided by consumer of API.
 
         ssn (int): Individual's Social Security Number.
 
@@ -142,7 +142,7 @@ class Individual(db.Model):
 
     """
     mci_id = db.Column(db.String(40), primary_key=True)
-    pairin_id = db.Column(db.String(40))
+    vendor_id = db.Column(db.String(40))
     ssn = db.Column(db.Integer)
     registration_date = db.Column(
         db.DateTime, server_default=db.func.now(), nullable=False)
@@ -166,7 +166,7 @@ class Individual(db.Model):
         Source.id, ondelete='CASCADE'))
 
     def __init__(self,
-                 pairin_id=None,
+                 vendor_id=None,
                  ssn=None,
                  registration_date=None,
                  first_name=None,
@@ -176,7 +176,7 @@ class Individual(db.Model):
                  email_address=None,
                  telephone=None):
         self.mci_id = MasterClientIDFactory.get_id()
-        self.pairin_id = pairin_id
+        self.vendor_id = vendor_id
         self.ssn = ssn
         self.registration_date = registration_date
         self.first_name = first_name

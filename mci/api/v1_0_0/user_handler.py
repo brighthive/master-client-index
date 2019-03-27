@@ -4,7 +4,12 @@ Handle user endpoint requests from the API.
 
 """
 
+from collections import OrderedDict
+from datetime import datetime
 from mci.id_factory import MasterClientIDFactory
+from mci.db.models import Individual, Address
+from mci.app.app import db
+from mci.helpers import build_links
 
 
 class UserHandler(object):
@@ -12,30 +17,143 @@ class UserHandler(object):
 
     """
 
-    def create_new_user(self):
+    def create_new_user(self, user_object):
         """ Creates a new user. """
-        user_id = MasterClientIDFactory.get_id()
+        errors = []
+        potential_match_criteria = {
+            'name': False,
+            'address': False,
+            'date_of_birth': False,
+            'ssn': False
+        }
+        address_id = None
+
+        try:
+            user = user_object.json
+        except Exception:
+            return {
+                'error': 'Malformed or empty JSON object found in request body.'
+            }, 400
+
+        new_user = Individual()
+
+        # basic user information
+        if 'vendor_id' in user.keys():
+            new_user.vendor_id = user['vendor_id']
+        if 'ssn' in user.keys():
+            new_user.ssn = user['ssn']
+        if 'first_name' in user.keys():
+            new_user.first_name = user['first_name']
+        if 'middle_name' in user.keys():
+            new_user.middle_name = user['middle_name']
+        if 'last_name' in user.keys():
+            new_user.last_name = user['last_name']
+
+        # mailing address
+        if 'mailing_address' in user.keys():
+            provided_address = user['mailing_address']
+            try:
+                new_address = Address(provided_address['address'].title(),
+                                      provided_address['city'].title(),
+                                      provided_address['state'].upper(),
+                                      provided_address['zip'],
+                                      provided_address['country'].upper())
+                address = Address.query.filter_by(address=new_address.address, city=new_address.city,
+                                                  state=new_address.state, postal_code=new_address.postal_code,
+                                                  country=new_address.country).first()
+                if address is not None:
+                    address_id = address.id
+                    potential_match_criteria['address'] = True
+                else:
+                    db.session.add(new_address)
+                    db.session.commit()
+                    address_id = new_address.id
+            except Exception:
+                return {'error': 'Invalid mailing address format.'}, 400
+
+        # date of birth
+        if 'date_of_birth' in user.keys():
+            try:
+                new_user.date_of_birth = datetime.strptime(
+                    user['date_of_birth'], '%Y-%m-%d')
+                print(new_user.date_of_birth)
+            except Exception:
+                return {'error': 'Invalid Date of Birth format.'}
+
+        # other items
+        if 'email_address' in user.keys():
+            pass
+
+        if 'telephone' in user.keys():
+            pass
+
+        if 'gender' in user.keys():
+            pass
+
+        if 'ethnicity_race' in user.keys():
+            pass
+
+        if 'education_level' in user.keys():
+            pass
+
+        if 'employment_status' in user.keys():
+            pass
+
+        if 'current_status' in user.keys():
+            pass
+
+        if 'source' in user.keys():
+            pass
+
+        new_user.mci_id = MasterClientIDFactory.get_id()
+        db.session.add(new_user)
+        db.session.commit()
+
         return {
-            'user_id': user_id
+            'user_id': new_user.mci_id
         }, 201
 
-    def get_all_users(self):
-        """ Retrireve all users. """
+    def get_all_users(self, offset=0, limit=20):
+        """ Retrieve all users.
 
-        return [
-            {
-                'mci_id': '1qaz2wsx',
-                'first_name': 'John',
-                'last_name': 'Doe'
-            },
-            {
-                'mci_id': '2ws3edc',
-                'first_name': 'Jane',
-                'last_name': 'Smith'
-            },
-            {
-                'mci_id': '456tgv',
-                'first_name': 'Arnold',
-                'last_name': 'Stiffelbacher'
-            }
-        ]
+        Args:
+            offset (int): Database offset to look up datasets by
+            limit (int): Number of results to return in the query set.
+
+        """
+
+        status_code = 200
+        try:
+            offset = int(offset)
+            limit = int(limit)
+            if offset < 0 or limit < 0:
+                return {
+                    'error': 'Offset and Limit must be positive integers.'
+                }, 400
+            if limit > 100:
+                limit = 100
+        except Exception:
+            return {
+                'error': 'Offset and Limit must be integers.'
+            }, 400
+
+        users = Individual.query.limit(limit).offset(offset)
+        row_count = Individual.query.count()
+        if row_count > 0:
+            links = build_links('users', offset, limit, row_count)
+        else:
+            links = []
+            status_code = 404
+
+        response = OrderedDict()
+        response['users'] = []
+
+        for user in users:
+            response['users'].append({
+                'mci_id': user.mci_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            })
+
+        response['links'] = links
+        return response, status_code
