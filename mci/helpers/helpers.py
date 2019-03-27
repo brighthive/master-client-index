@@ -60,7 +60,6 @@ def build_links(endpoint: str, offset: int, limit: int, rows: int):
     prev = OrderedDict()
     next = OrderedDict()
     last = OrderedDict()
-
     links = []
 
     current['rel'] = 'self'
@@ -68,7 +67,7 @@ def build_links(endpoint: str, offset: int, limit: int, rows: int):
     links.append(current)
 
     first['rel'] = 'first'
-    first['href'] = url_link.format(endpoint, compute_offset(1, limit))
+    first['href'] = url_link.format(endpoint, compute_offset(1, limit), limit)
     links.append(first)
 
     if current_page > 1:
