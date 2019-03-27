@@ -66,6 +66,21 @@ class Gender(db.Model):
         self.gender = gender
 
 
+class Disposition(db.Model):
+    """The individual's disposition types.
+
+    Args:
+        disposition (str): The individual's disposition
+
+    """
+
+    id = db.Column(db.Integer, primary_key=True)
+    disposition = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, disposition=None):
+        self.disposition = disposition
+
+
 class EthnicityRace(db.Model):
     """The individual's ethnicity/race.
 
@@ -106,12 +121,6 @@ class EmploymentStatus(db.Model):
 
     def __init__(self, employment_status=None):
         self.employment_status = employment_status
-
-
-# class CurrentStatus(db.Model):
-#     """The individual's current status."""
-#     id = db.Column(db.Integer, primary_key=True)
-#     current_status = db.Column(db.String, nullable=False)
 
 
 class Individual(db.Model):
@@ -164,6 +173,8 @@ class Individual(db.Model):
         EmploymentStatus.id, ondelete='CASCADE'))
     source_id = db.Column(db.Integer, db.ForeignKey(
         Source.id, ondelete='CASCADE'))
+    dispositions = db.relationship(
+        'Disposition', secondary='IndividualDisposition')
 
     def __init__(self,
                  vendor_id=None,
@@ -185,6 +196,13 @@ class Individual(db.Model):
         self.date_of_birth = date_of_birth
         self.email_address = email_address
         self.telephone = telephone
+
+
+class IndividualDisposition(db.Model):
+    individual_id = db.Column(db.String(40), db.ForeignKey(
+        Individual.mci_id, ondelete='CASCADE'), nullable=False, primary_key=True)
+    disposition_id = db.Column(db.Integer, db.ForeignKey(
+        Disposition.id, ondelete='CASCADE'), nullable=False, primary_key=True)
 
 
 class Referral(db.Model):
@@ -217,19 +235,3 @@ class Referral(db.Model):
         self.mci_id = mci_id
         self.referring_id = referring_id
         self.date_referred = date_referred
-
-
-# class IndividualCurrentStatus(db.Model):
-#     """An individual's current status.
-
-#     Args:
-#         mci_id (str): The individual's MCI ID.
-
-#         current_status_id (int): The Curent Status ID.
-
-#     """
-
-#     mci_id = db.Column(db.String(40), db.ForeignKey(
-#         Individual.mci_id, ondelete='CASCADE'), primary_key=True)
-#     current_status_id = db.Column(
-#         db.Integer, db.ForeignKey(CurrentStatus.id), primary_key=True)

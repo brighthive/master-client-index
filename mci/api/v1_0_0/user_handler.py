@@ -7,7 +7,7 @@ Handle user endpoint requests from the API.
 from collections import OrderedDict
 from datetime import datetime
 from mci.id_factory import MasterClientIDFactory
-from mci.db.models import Individual, Address
+from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace, Gender, Source
 from mci.app.app import db
 from mci.helpers import build_links, validate_email
 
@@ -101,13 +101,9 @@ class UserHandler(object):
         if 'employment_status' in user.keys():
             pass
 
-        if 'current_status' in user.keys():
-            pass
-
         if 'source' in user.keys():
             pass
 
-        new_user.mci_id = MasterClientIDFactory.get_id()
         db.session.add(new_user)
         db.session.commit()
 
