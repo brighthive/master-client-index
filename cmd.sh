@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gunicorn -b 0.0.0.0 mci:app
+gunicorn -b 0.0.0.0 mci:app --reload

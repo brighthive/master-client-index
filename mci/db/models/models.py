@@ -152,7 +152,7 @@ class Individual(db.Model):
     """
     mci_id = db.Column(db.String(40), primary_key=True)
     vendor_id = db.Column(db.String(40))
-    ssn = db.Column(db.Integer)
+    ssn = db.Column(db.String(20))
     registration_date = db.Column(
         db.DateTime, server_default=db.func.now(), nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
@@ -165,8 +165,6 @@ class Individual(db.Model):
         db.Integer, db.ForeignKey(Address.id, ondelete='CASCADE'))
     gender_id = db.Column(db.Integer, db.ForeignKey(
         Gender.id, ondelete='CASCADE'))
-    # ethnicity_and_race_id = db.Column(
-    #     db.Integer, db.ForeignKey(EthnicityRace.id, ondelete='CASCADE'))
     ethnicity_races = db.relationship(
         'EthnicityRace', secondary='individual_ethnicity_race')
     education_level_id = db.Column(db.Integer, db.ForeignKey(
