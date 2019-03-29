@@ -55,6 +55,7 @@ class Config(object):
 
     # Database Settings
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PROPAGATE_EXCEPTIONS = True
     POSTGRES_USER = 'test_user'
     POSTGRES_PASSWORD = 'test_password'
     POSTGRES_DATABASE = 'master_client_index'
