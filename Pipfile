@@ -19,6 +19,7 @@ expects = "*"
 pytest = "*"
 pytest-cov = "*"
 docker = "*"
+sphinx = "*"
 
 [requires]
 python_version = "3.7"
