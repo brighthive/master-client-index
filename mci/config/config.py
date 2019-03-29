@@ -6,6 +6,7 @@ A collection of classes for describing various application configuration environ
 
 import os
 import json
+from brighthive_authlib import OAuth2ProviderFactory, AuthLibConfiguration
 
 
 class Config(object):
@@ -119,6 +120,23 @@ class Config(object):
             pass
 
         return api_name
+
+    @staticmethod
+    def get_oauth2_provider():
+        """Get the OAuth 2.0 provider.
+
+        """
+        # OAuth 2.0
+        provider = 'AUTH0'
+        oauth2_url = 'https://brighthive-test.auth0.com'
+        json_url = '{}/.well-known/jwks.json'.format(oauth2_url)
+        audience = 'http://localhost:8000'
+        algorithms = ['RS256']
+        auth_config = AuthLibConfiguration(
+            provider=provider, base_url=oauth2_url, jwks_url=json_url, algorithms=algorithms, audience=audience)
+        oauth2_provider = OAuth2ProviderFactory.get_provider(
+            provider, auth_config)
+        return oauth2_provider
 
 
 class DevelopmentConfig(Config):

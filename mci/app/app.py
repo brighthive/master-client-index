@@ -8,7 +8,14 @@ from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from brighthive_authlib import OAuth2ProviderError
 from mci.config import ConfigurationFactory
+
+
+def handle_auth_denied(e):
+    print('Handline access denied maybe?')
+    return {'message': 'Access Denied'}, 401
+
 
 app = Flask(__name__)
 app.config.from_object(ConfigurationFactory.from_env())
@@ -41,3 +48,9 @@ if db:
     api.add_resource(HealthCheckResource, '/employment',
                      endpoint='employment_ep')
     api.add_resource(HealthCheckResource, '/status', endpoint='status_ep')
+
+
+@app.errorhandler(OAuth2ProviderError)
+def handle_auth_denied(e):
+    print('Handline access denied maybe?')
+    return {'message': 'Access Denied'}, 401

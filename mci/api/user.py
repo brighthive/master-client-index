@@ -5,6 +5,7 @@ This class represents a user registered with the Master Client Index.
 """
 
 from flask import request
+from brighthive_authlib import token_required
 from mci.api import VersionedResource, V1_0_0_UserHandler
 
 

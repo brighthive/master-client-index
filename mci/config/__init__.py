@@ -1,1 +1,1 @@
-from mci.config.config import ConfigurationFactory
+from mci.config.config import ConfigurationFactory, Config
