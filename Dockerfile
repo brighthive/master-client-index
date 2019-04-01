@@ -7,6 +7,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip && pip install pipenv && pipenv install --system \
     && apt-get purge -y --auto-remove gcc
+ADD wsgi.py wsgi.py
 ADD cmd.sh cmd.sh
 RUN chmod a+x cmd.sh
 ADD mci mci

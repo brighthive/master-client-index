@@ -4,7 +4,6 @@ MAX_RETRIES=5
 MIGRATION_PATH=mci/db/migrations
 
 if [ "$APP_ENV" == "SANDBOX" ]; then
-    cd /master-client-index
     RETRIES=0
     until flask db upgrade -d $MIGRATION_PATH; do
         RETRIES=`expr $RETRIES + 1`
