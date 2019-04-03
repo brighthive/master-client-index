@@ -101,7 +101,17 @@ class UserResource(VersionedResource):
         return self.get_request_handler(request.headers).get_health()
 
 
-class UserDetailResource(V1_0_0_UserHandler):
+class UserDetailResource(UserResource):
     """ A specific user. """
 
-    pass
+    def get(self, mci_id: str):
+        return self.get_request_handler(request.headers).get_user_by_id(mci_id)
+
+    def post(self):
+        pass
+
+    def put(self):
+        pass
+
+    def delete(self):
+        pass

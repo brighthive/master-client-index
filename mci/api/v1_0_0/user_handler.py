@@ -22,6 +22,76 @@ class UserHandler(object):
 
     """
 
+    def get_mailing_address(self, user: Individual):
+        """ Return an individuals mailing address if available.
+
+        Args:
+            user (Individual): The user to find the mailing address of.
+
+        Return:
+            dict: Mailing address
+
+        """
+        mailing_address = {
+            'address': '',
+            'city': '',
+            'state': '',
+            'postal_code': '',
+            'country': ''
+        }
+
+        if user.mailing_address_id is not None:
+            address = Address.query.filter_by(id=user.mailing_address_id).first()
+            if address is not None:
+                mailing_address['address'] = '' if address.address is None else address.address
+                mailing_address['city'] = '' if address.city is None else address.city
+                mailing_address['state'] = '' if address.state is None else address.state
+                mailing_address['postal_code'] = '' if address.postal_code is None else address.postal_code
+                mailing_address['country'] = '' if address.country is None else address.country
+
+        return mailing_address
+
+    def get_user_by_id(self, mci_id: str):
+        """Look up a user by their MCI ID.
+
+        Args:
+            mci_id (str): The MCI ID to query for.
+
+        Return:
+            dict, int: An object representing the specified user and the associated error code.
+
+        """
+
+        try:
+            user_obj = Individual.query.filter_by(mci_id=mci_id).first()
+            if user_obj is None:
+                raise Exception
+            else:
+                user = {
+                    'mci_id': user_obj.mci_id,
+                    'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
+                    # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
+                    'first_name': '' if user_obj.first_name is None else user_obj.first_name,
+                    'last_name': '' if user_obj.last_name is None else user_obj.last_name,
+                    'middle_name': '' if user_obj.middle_name is None else user_obj.middle_name,
+                    'mailing_address': self.get_mailing_address(user_obj),
+                    'date_of_birth': '' if user_obj.date_of_birth is None else str(user_obj.date_of_birth),
+                    'email_address': '' if user_obj.email_address is None else user_obj.email_address,
+                    'telephone': '' if user_obj.telephone is None else user_obj.telephone,
+                    'gender': '',
+                    'ethnicity_race': '',
+                    'education_level': '',
+                    'employment_status': '',
+                    'source': ''
+                }
+
+                user['vendor_id'] = '' if user_obj.vendor_id is None else user_obj.vendor_id
+
+                return user, 200
+        except Exception as e:
+            print('Exception is {}'.format(e))
+            return {'error': 'Cannot find user with MCI ID {}'.format(mci_id)}, 404
+
     def find_address_id(self, address):
         """Look up address.
 

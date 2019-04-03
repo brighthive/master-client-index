@@ -19,10 +19,11 @@ migrate = Migrate(app, db)
 api = Api(app)
 
 if db:
-    from mci.api import UserResource, HealthCheckResource
+    from mci.api import UserResource, UserDetailResource, HealthCheckResource
 
     # core endpoints
     api.add_resource(UserResource, '/users', endpoint='users_ep')
+    api.add_resource(UserDetailResource, '/users/<mci_id>', endpoint='user_detail_ep')
     api.add_resource(HealthCheckResource, '/referrals',
                      endpoint='referrals_ep')
 
@@ -52,6 +53,9 @@ def handle_errors(e):
         try:
             error_code = str(e).split(':')[0][:3].strip()
             error_text = str(e).split(':')[0][3:].strip()
-            return json.dumps({'error': error_text}), error_code
+            if isinstance(error_code, int):
+                return json.dumps({'error': error_text}), error_code
+            else:
+                raise Exception
         except Exception:
             return json.dumps({'error': 'An unknown error occured'}), 400
