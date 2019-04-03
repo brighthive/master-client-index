@@ -99,3 +99,9 @@ class UserResource(VersionedResource):
 
         """
         return self.get_request_handler(request.headers).get_health()
+
+
+class UserDetailResource(V1_0_0_UserHandler):
+    """ A specific user. """
+
+    pass

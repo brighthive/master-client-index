@@ -44,6 +44,14 @@ if db:
     api.add_resource(HealthCheckResource, '/status', endpoint='status_ep')
 
 
-@app.errorhandler(OAuth2ProviderError)
-def handle_auth_denied(e):
-    return json.dumps({'message': 'Access Denied'}), 401
+@app.errorhandler(Exception)
+def handle_errors(e):
+    if isinstance(e, OAuth2ProviderError):
+        return json.dumps({'message': 'Access Denied'}), 401
+    else:
+        try:
+            error_code = str(e).split(':')[0][:3].strip()
+            error_text = str(e).split(':')[0][3:].strip()
+            return json.dumps({'error': error_text}), error_code
+        except Exception:
+            return json.dumps({'error': 'An unknown error occured'}), 400
