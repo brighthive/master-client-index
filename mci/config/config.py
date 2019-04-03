@@ -87,6 +87,16 @@ class Config(object):
         return settings
 
     @staticmethod
+    def get_data_resource_url():
+        """Retrieve the Data Resource API URL.
+
+        Returns:
+            str: Data Resource API URL
+
+        """
+        return os.getenv('DATA_RESOURCE_URL', 'http://localhost:5000')
+
+    @staticmethod
     def get_api_version():
         """Return API version.
 

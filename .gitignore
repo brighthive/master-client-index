@@ -7,3 +7,8 @@
 
 # pytest artifacts
 **/.pytest_cache
+
+# sample data provided by customer (DO NOT COMMIT)
+**/samples
+**/scripts
+**/out.sql
