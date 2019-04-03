@@ -41,7 +41,8 @@ class UserHandler(object):
         }
 
         if user.mailing_address_id is not None:
-            address = Address.query.filter_by(id=user.mailing_address_id).first()
+            address = Address.query.filter_by(
+                id=user.mailing_address_id).first()
             if address is not None:
                 mailing_address['address'] = '' if address.address is None else address.address
                 mailing_address['city'] = '' if address.city is None else address.city
@@ -70,6 +71,7 @@ class UserHandler(object):
                 user = {
                     'mci_id': user_obj.mci_id,
                     'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
+                    'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
                     # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
                     'first_name': '' if user_obj.first_name is None else user_obj.first_name,
                     'last_name': '' if user_obj.last_name is None else user_obj.last_name,
@@ -78,15 +80,12 @@ class UserHandler(object):
                     'date_of_birth': '' if user_obj.date_of_birth is None else str(user_obj.date_of_birth),
                     'email_address': '' if user_obj.email_address is None else user_obj.email_address,
                     'telephone': '' if user_obj.telephone is None else user_obj.telephone,
-                    'gender': '',
-                    'ethnicity_race': '',
+                    'gender': self.find_gender_type(user_obj),
+                    'ethnicity_race': self.find_user_ethnicity(user_obj),
                     'education_level': '',
-                    'employment_status': '',
-                    'source': ''
+                    'employment_status': self.find_employment_status_type(user_obj),
+                    'source': self.find_source_type(user_obj)
                 }
-
-                user['vendor_id'] = '' if user_obj.vendor_id is None else user_obj.vendor_id
-
                 return user, 200
         except Exception as e:
             print('Exception is {}'.format(e))
@@ -151,6 +150,59 @@ class UserHandler(object):
             result['id'] = gender.id
 
         return result
+
+    def find_employment_status_type(self, user: Individual):
+        """
+        """
+        try:
+            employment_status = EmploymentStatus.query.filter_by(
+                id=user.employment_status_id).first()
+            return employment_status.employment_status
+        except Exception:
+            return ''
+
+    def find_gender_type(self, user: Individual):
+        """Locate Gender value based on its type.
+
+        Args:
+            gender_id: Gender type value to look up.
+
+        Return:
+            str: The gender type based on the string.
+        """
+        try:
+            gender = Gender.query.filter_by(id=user.gender_id).first()
+            return gender.gender
+        except Exception:
+            return ''
+
+    def find_source_type(self, user: Individual):
+        """Locate Registration source value based on its id.
+
+        Args:
+            user (Individual): Gender type value to look up.
+
+        Return:
+            str: The source type string.
+        """
+        try:
+            source = Source.query.filter_by(id=user.source_id).first()
+            return source.source
+        except Exception:
+            return ''
+
+    def find_user_ethnicity(self, user: Individual):
+        """Retrieve a user's ethnicities based on their IDs
+
+
+        """
+        ethnicities = []
+        try:
+            for ethnicity in user.ethnicity_races:
+                ethnicities.append(ethnicity.ethnicity_race)
+        except Exception:
+            pass
+        return ethnicities
 
     def find_ethnicity_race(self, ethnicity_type: str):
         """Locate Ethnicity/Race ID based on it's value.
