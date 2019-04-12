@@ -45,6 +45,7 @@ class UserResource(VersionedResource):
             dict: API health status.
 
         """
+
         offset = 0
         limit = 20
         args = request.args
