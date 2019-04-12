@@ -23,7 +23,8 @@ if db:
 
     # core endpoints
     api.add_resource(UserResource, '/users', endpoint='users_ep')
-    api.add_resource(UserDetailResource, '/users/<mci_id>', endpoint='user_detail_ep')
+    api.add_resource(UserDetailResource, '/users/<mci_id>',
+                     endpoint='user_detail_ep')
     api.add_resource(HealthCheckResource, '/referrals',
                      endpoint='referrals_ep')
 
@@ -45,18 +46,18 @@ if db:
     api.add_resource(HealthCheckResource, '/status', endpoint='status_ep')
 
 
-# @app.errorhandler(Exception)
-# def handle_errors(e):
-#     if isinstance(e, OAuth2ProviderError):
-#         return json.dumps({'message': 'Access Denied'}), 401
-#     else:
-#         try:
-#             error_code = str(e).split(':')[0][:3].strip()
-#             error_text = str(e).split(':')[0][3:].strip()
-#             if isinstance(error_code, int):
-#                 return json.dumps({'error': error_text}), error_code
-#             else:
-#                 raise Exception
-#         except Exception as e:
-#             print(e)
-#             return json.dumps({'error': 'An unknown error occured'}), 400
+@app.errorhandler(Exception)
+def handle_errors(e):
+    if isinstance(e, OAuth2ProviderError):
+        return json.dumps({'message': 'Access Denied'}), 401
+    else:
+        try:
+            error_code = str(e).split(':')[0][:3].strip()
+            error_text = str(e).split(':')[0][3:].strip()
+            if isinstance(error_code, int):
+                return json.dumps({'error': error_text}), error_code
+            else:
+                raise Exception
+        except Exception as e:
+            print(e)
+            return json.dumps({'error': 'An unknown error occured'}), 400
