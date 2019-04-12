@@ -11,4 +11,4 @@
 # sample data provided by customer (DO NOT COMMIT)
 **/samples
 **/scripts
-**/out.sql
+**/*.sql
