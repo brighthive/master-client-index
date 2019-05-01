@@ -1,0 +1,21 @@
+version: '3'
+services:
+    mci:
+        image: brighthive/master-client-index:1.0.0
+        ports:
+            - "8001:8000"
+        environment:
+            - APP_ENV=SANDBOX
+            - POSTGRES_USER=brighthive
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DATABASE=mci_dev
+            - POSTGRES_HOSTNAME=postgres_mci
+            - POSTGRES_PORT=5432
+        depends_on:
+            - postgres_mci
+    postgres_mci:
+        image: postgres:11.1
+        environment:
+            - POSTGRES_USER=brighthive
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DB=mci_dev
