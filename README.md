@@ -6,9 +6,59 @@ BrightHive's Master Client Index Platform.
 
 The **Master Client Index** (MCI) is a repository of the clients in a Data Trust ecosystem. The MCI stores the client information and provides a unique Master Client Index ID (MCI ID).
 
+## Get started
+
+### Docker
+
+BrightHive uses Docker to ensure that developers do consistent work, across all environments. MCI comes with `Dockerfile` and `docker-compose.yml`. Use them, like so:
+
+```
+# build an image, and give it a clear name with a version/tag number
+docker build -t brighthive/master-client-index:1.0.0 .
+
+# configure and run containers (i.e., the MCI app, and psql)
+docker-compose up -d
+```
+
+`docker-compose.yml` maps port 8000 (on the container) to port 8001. Visit MCI by going to `http://0.0.0.0:8001/health`. You should see a JSON blob. (Read on to learn about API access.)
+
+```json
+{
+	message: "Access Denied"
+}
+```
+
+### Managing the virtual environment
+
+BrightHive recommends managing virtual environments with `pipenv`. [Learn how to setup `pipenv`.](https://docs.pipenv.org/en/latest/) Then, do the following:
+
+```
+# tell pipenv to create/update a virtual env
+pipenv install
+
+# install development dependencies, i.e., the libraries
+# enumerated in [dev-packages] of the Pipfile
+pipenv install --dev
+```
+
+Need to install another dependency, not included in the Pipfile? Simply run:
+
+```
+pipenv install <package name>
+# e.g., pipenv install flake8
+```
+ 
+`pipenv install` automatically updates the `Pipfile` and `Pipfile.lock`. Pull these into the docker container by re-building the MCI image, and re-configuring the container:
+
+```
+docker build -t brighthive/master-client-index:1.0.0
+
+docker-composer up -d
+```
+
 ## API Access (Auth)
 
-To access the Master Client Index API, the following steps are required:
+The MCI exposes several [RESTful endpoints](https://app.swaggerhub.com/apis-docs/BrightHive/master-client-index/1.0.0), e.g., `users/{mci_id}`. To access them, the following steps are required:
 
 1. Retrieve Access Token from OAuth 2.0 Server.
 2. Use the Access Token to make HTTP request to the API.
