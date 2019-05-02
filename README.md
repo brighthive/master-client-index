@@ -35,9 +35,13 @@ BrightHive recommends managing virtual environments with `pipenv`. [Learn how to
 ```
 # tell pipenv to create/update a virtual env
 pipenv install
+
+# install development dependencies, i.e., the libraries
+# enumerated in [dev-packages] of the Pipfile
+pipenv install --dev
 ```
 
-Need to install another dependency? Simply run:
+Need to install another dependency, not included in the Pipfile? Simply run:
 
 ```
 pipenv install <package name>
