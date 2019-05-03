@@ -100,3 +100,16 @@ curl -X GET https://sandbox.brighthive.net/master-client-index/users -H 'Authori
 ### Renew The Expired Token
 
 Once the token has expired, simply request a new token via the same mechanism that was used to provide the previous token.
+
+## Data
+
+MCI has relatively unsurprising data models. Populate your database manually, or ask a fellow developer for a db dump. With the latter, run:
+
+```
+cat <dump_name>.sql | docker exec -i masterclientindex_postgres_mci_1 psql -U brighthive -d mci_dev
+
+# cat <filename>.sql | docker exec -i <psql_container_name> -U <username> -d <database>
+```
+
+This command ports the database dump to the psql container, in a single, easy step.
+
