@@ -97,6 +97,15 @@ class Config(object):
         return os.getenv('DATA_RESOURCE_URL', 'http://localhost:5000')
 
     @staticmethod
+    def get_matching_service_uri():
+        """Retrieves the URI for the mci-matching-service, which
+        listens for POST requests from MCI and returns a potential user 
+        and match score.
+        """
+        # For now, assume that developers have the matching-service running locally, on port 8000.
+        return os.getenv('MATCHING_SERVICE_URI', 'http://0.0.0.0:8000/compute-match')
+
+    @staticmethod
     def get_api_version():
         """Return API version.
 
@@ -149,7 +158,6 @@ class Config(object):
             provider, auth_config)
         return oauth2_provider
 
-
 class DevelopmentConfig(Config):
     """Development Configuration class.
 
@@ -192,7 +200,6 @@ class DevelopmentConfig(Config):
 
         """
         return '{}:{}'.format(self.IMAGE_NAME, self.IMAGE_VERSION)
-
 
 class TestConfig(Config):
     """Test Configuration class.

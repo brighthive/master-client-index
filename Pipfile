@@ -13,6 +13,7 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
 brighthive-authlib = "*"
+requests = "*"
 
 [dev-packages]
 expects = "*"

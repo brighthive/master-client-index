@@ -13,6 +13,9 @@ from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus,
     Gender, Source, IndividualDisposition, Disposition
 from mci.app.app import db
 from mci.helpers import build_links, validate_email, error_message
+from mci.config import ConfigurationFactory
+
+config = ConfigurationFactory.from_env()
 
 
 class UserHandler(object):
@@ -384,7 +387,6 @@ class UserHandler(object):
             return error_message('Malformed or empty JSON object found in request body.')
 
         new_user = Individual()
-
         # basic user information
         if 'vendor_id' in user.keys():
             new_user.vendor_id = user['vendor_id']
@@ -475,9 +477,23 @@ class UserHandler(object):
                         new_user.dispositions.append(disposition['object'])
 
         if len(errors) == 0:
-            mci_threshold = os.getenv('MCI_THRESHOLD', 0.95)
-            matched_user, computed_mci_threshold = self.compute_mci_threshold(
+            mci_threshold = os.getenv('MCI_THRESHOLD', 0.9)
+            '''
+            Replace old with new!
+            # matched_user, computed_mci_threshold = self.compute_mci_threshold(
                 new_user)
+            '''
+            matching_service_uri = config.get_matching_service_uri()
+            
+            import requests
+            response = requests.post(match_service_uri, data=new_user)
+
+            computed_mci_threshold = response['score']
+            matched_individual_id = response['mci_id']
+
+            # TODO:
+            # add a line to filter for the user with the ID.
+            # rename `matched_user` to `matched_individual`
 
             if computed_mci_threshold >= mci_threshold:
                 return {

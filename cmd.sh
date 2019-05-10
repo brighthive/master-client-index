@@ -18,5 +18,5 @@ fi
 if [ "$APP_ENV" == "DEVELOPMENT" ] || [ -z "$APP_ENV" ]; then
     gunicorn -b 0.0.0.0 mci:app --reload
 else
-    gunicorn -b 0.0.0.0 mci:app
+    gunicorn -b 0.0.0.0 mci:app --reload --log-level=DEBUG --timeout 240
 fi
