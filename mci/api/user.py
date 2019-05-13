@@ -47,7 +47,7 @@ class UserResource(VersionedResource):
         """
 
         offset = 0
-        limit = 20
+        limit = Config.get_page_limit()
         args = request.args
         try:
             offset = request.args['offset']
