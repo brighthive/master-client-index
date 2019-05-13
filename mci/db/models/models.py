@@ -156,6 +156,7 @@ class Individual(db.Model):
     registration_date = db.Column(
         db.DateTime, server_default=db.func.now(), nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
+    suffix = db.Column(db.String(10))
     middle_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     date_of_birth = db.Column(db.Date, nullable=False)
@@ -181,6 +182,7 @@ class Individual(db.Model):
                  ssn=None,
                  registration_date=None,
                  first_name=None,
+                 suffix=None,
                  middle_name=None,
                  last_name=None,
                  date_of_birth=None,
@@ -192,6 +194,7 @@ class Individual(db.Model):
         self.ssn = ssn
         self.registration_date = registration_date
         self.first_name = first_name
+        self.suffix = suffix
         self.middle_name = middle_name
         self.last_name = last_name
         self.date_of_birth = date_of_birth

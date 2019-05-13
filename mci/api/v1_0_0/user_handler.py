@@ -8,6 +8,7 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 from sqlalchemy import func
+from mci.config import Config
 from mci.id_factory import MasterClientIDFactory
 from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace,\
     Gender, Source, IndividualDisposition, Disposition
@@ -74,6 +75,7 @@ class UserHandler(object):
                     'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
                     # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
                     'first_name': '' if user_obj.first_name is None else user_obj.first_name,
+                    'suffix': '' if user_obj.suffix is None else user_obj.suffix,
                     'last_name': '' if user_obj.last_name is None else user_obj.last_name,
                     'middle_name': '' if user_obj.middle_name is None else user_obj.middle_name,
                     'mailing_address': self.get_mailing_address(user_obj),
@@ -392,6 +394,8 @@ class UserHandler(object):
             new_user.ssn = user['ssn']
         if 'first_name' in user.keys():
             new_user.first_name = user['first_name'].title()
+        if 'suffix' in user.keys():
+            new_user.suffix = user['suffix'].title()
         if 'middle_name' in user.keys():
             new_user.middle_name = user['middle_name'].title()
         if 'last_name' in user.keys():
@@ -517,8 +521,8 @@ class UserHandler(object):
             limit = int(limit)
             if offset < 0 or limit < 0:
                 return error_message('Offset and Limit must be positive integers.')
-            if limit > 100:
-                limit = 100
+            if limit > Config.get_page_limit():
+                limit = Config.get_page_limit()
         except Exception:
             return error_message('Offset and Limit must be integers.')
 
@@ -537,7 +541,8 @@ class UserHandler(object):
             response['users'].append({
                 'mci_id': user.mci_id,
                 'first_name': user.first_name,
-                'last_name': user.last_name
+                'last_name': user.last_name,
+                'suffix': user.suffix
             })
 
         response['links'] = links
