@@ -197,6 +197,10 @@ class Individual(db.Model):
         self.date_of_birth = date_of_birth
         self.email_address = email_address
         self.telephone = telephone
+    
+    @property
+    def as_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
 class IndividualDisposition(db.Model):

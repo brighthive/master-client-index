@@ -4,16 +4,21 @@ Handle user endpoint requests from the API.
 
 """
 
+import json
 import os
 from collections import OrderedDict
 from datetime import datetime
+
+import requests
 from sqlalchemy import func
-from mci.id_factory import MasterClientIDFactory
-from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace,\
-    Gender, Source, IndividualDisposition, Disposition
+
 from mci.app.app import db
-from mci.helpers import build_links, validate_email, error_message
 from mci.config import ConfigurationFactory
+from mci.db.models import (Address, Disposition, EducationLevel,
+                           EmploymentStatus, EthnicityRace, Gender, Individual,
+                           IndividualDisposition, Source)
+from mci.helpers import build_links, error_message, validate_email
+from mci.id_factory import MasterClientIDFactory
 
 config = ConfigurationFactory.from_env()
 
@@ -332,51 +337,51 @@ class UserHandler(object):
 
         return result
 
-    def compute_score(self, weights: dict):
-        score = 0.0
-        for weight in weights.keys():
-            score += weights[weight]
-        return score
+    # def compute_score(self, weights: dict):
+    #     score = 0.0
+    #     for weight in weights.keys():
+    #         score += weights[weight]
+    #     return score
 
-    def compute_mci_threshold(self, user: Individual):
-        """Compute the MCI Threshold for a given individual.
+    # def compute_mci_threshold(self, user: Individual):
+    #     """Compute the MCI Threshold for a given individual.
 
-        Notes:
-            For the purpose of this exercise, we estimate our probability to be:
-                first_name * last_name * email_address * address * dob * ssn
+    #     Notes:
+    #         For the purpose of this exercise, we estimate our probability to be:
+    #             first_name * last_name * email_address * address * dob * ssn
 
-        """
-        match = None
-        matched = False
-        score = 0.0
+    #     """
+    #     match = None
+    #     matched = False
+    #     score = 0.0
 
-        weights = {
-            'first_name': 0.1,
-            'last_name': 0.1,
-            'mailing_address_id': 0.2,
-            'date_of_birth': 0.2,
-            'ssn': 0.4
-        }
+    #     weights = {
+    #         'first_name': 0.1,
+    #         'last_name': 0.1,
+    #         'mailing_address_id': 0.2,
+    #         'date_of_birth': 0.2,
+    #         'ssn': 0.4
+    #     }
 
-        filters = {
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'mailing_address_id': user.mailing_address_id,
-            'date_of_birth': user.date_of_birth,
-            'ssn': user.ssn
-        }
+    #     filters = {
+    #         'first_name': user.first_name,
+    #         'last_name': user.last_name,
+    #         'mailing_address_id': user.mailing_address_id,
+    #         'date_of_birth': user.date_of_birth,
+    #         'ssn': user.ssn
+    #     }
 
-        while not matched and len(filters.keys()) > 0:
-            match = Individual.query.filter_by(**filters).first()
-            if match:
-                matched = True
-                score = self.compute_score(weights)
-            else:
-                for key in weights.keys():
-                    del(weights[key])
-                    del(filters[key])
-                    break
-        return match, score
+    #     while not matched and len(filters.keys()) > 0:
+    #         match = Individual.query.filter_by(**filters).first()
+    #         if match:
+    #             matched = True
+    #             score = self.compute_score(weights)
+    #         else:
+    #             for key in weights.keys():
+    #                 del(weights[key])
+    #                 del(filters[key])
+    #                 break
+    #     return match, score
 
     def create_new_user(self, user_object):
         """ Creates a new user. """
@@ -478,29 +483,36 @@ class UserHandler(object):
 
         if len(errors) == 0:
             mci_threshold = os.getenv('MCI_THRESHOLD', 0.9)
-            '''
-            Replace old with new!
-            # matched_user, computed_mci_threshold = self.compute_mci_threshold(
-                new_user)
-            '''
             matching_service_uri = config.get_matching_service_uri()
-            
-            import requests
-            response = requests.post(match_service_uri, data=new_user)
+
+            '''
+            Should we pass the `user` json to `compute-matching` endpoint, and do the 
+            normalization there? Maybe not, since: (1) the matching service would need
+            to query other tables in the database, and (2) the MCI may need to create a new_user.
+
+            Soooooo....serialize the `new_user` object.
+            Question! How can we handle the date_of_birth, so that 1966-01-01 matches with 1966-1-1? 
+            '''
+            new_user_json = json.dumps(new_user.as_dict, default=str)
+
+            import pdb
+            pdb.set_trace()
+
+            # How do I connect with the matching service?
+            # Should I containerize the matching service, then bind it to a particular port/host?
+            response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
 
             computed_mci_threshold = response['score']
-            matched_individual_id = response['mci_id']
-
-            # TODO:
-            # add a line to filter for the user with the ID.
-            # rename `matched_user` to `matched_individual`
+            matched_mci_id = response['mci_id']
 
             if computed_mci_threshold >= mci_threshold:
+                matched_individual = Individual.query.filter_by(mci_id=matched_mci_id).first()
+                
                 return {
-                    'mci_id': matched_user.mci_id,
-                    'vendor_id': matched_user.vendor_id,
-                    'first_name': matched_user.first_name,
-                    'last_name': matched_user.last_name,
+                    'mci_id': matched_individual.mci_id,
+                    'vendor_id': matched_individual.vendor_id,
+                    'first_name': matched_individual.first_name,
+                    'last_name': matched_individual.last_name,
                     'match_probability': computed_mci_threshold
                 }, 200
             else:
