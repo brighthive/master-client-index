@@ -101,9 +101,11 @@ class Config(object):
         """Retrieves the URI for the mci-matching-service, which
         listens for POST requests from MCI and returns a potential user 
         and match score.
+
+        The matching service runs in a container, on the same Docker network as MCI,
+        and it can be accessed via the mci-matching-service container name.
         """
-        # For now, assume that developers have the matching-service running locally, on port 8000.
-        return os.getenv('MATCHING_SERVICE_URI', 'http://0.0.0.0:8000/compute-match')
+        return os.getenv('MATCHING_SERVICE_URI', 'http://mcimatchingservice_mci_1:8000/compute-match')
 
     @staticmethod
     def get_api_version():
