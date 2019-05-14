@@ -337,52 +337,6 @@ class UserHandler(object):
 
         return result
 
-    # def compute_score(self, weights: dict):
-    #     score = 0.0
-    #     for weight in weights.keys():
-    #         score += weights[weight]
-    #     return score
-
-    # def compute_mci_threshold(self, user: Individual):
-    #     """Compute the MCI Threshold for a given individual.
-
-    #     Notes:
-    #         For the purpose of this exercise, we estimate our probability to be:
-    #             first_name * last_name * email_address * address * dob * ssn
-
-    #     """
-    #     match = None
-    #     matched = False
-    #     score = 0.0
-
-    #     weights = {
-    #         'first_name': 0.1,
-    #         'last_name': 0.1,
-    #         'mailing_address_id': 0.2,
-    #         'date_of_birth': 0.2,
-    #         'ssn': 0.4
-    #     }
-
-    #     filters = {
-    #         'first_name': user.first_name,
-    #         'last_name': user.last_name,
-    #         'mailing_address_id': user.mailing_address_id,
-    #         'date_of_birth': user.date_of_birth,
-    #         'ssn': user.ssn
-    #     }
-
-    #     while not matched and len(filters.keys()) > 0:
-    #         match = Individual.query.filter_by(**filters).first()
-    #         if match:
-    #             matched = True
-    #             score = self.compute_score(weights)
-    #         else:
-    #             for key in weights.keys():
-    #                 del(weights[key])
-    #                 del(filters[key])
-    #                 break
-    #     return match, score
-
     def create_new_user(self, user_object):
         """ Creates a new user. """
         errors = []
@@ -482,7 +436,6 @@ class UserHandler(object):
                         new_user.dispositions.append(disposition['object'])
 
         if len(errors) == 0:
-            mci_threshold = os.getenv('MCI_THRESHOLD', 0.9)
             matching_service_uri = config.get_matching_service_uri()
 
             '''
@@ -494,41 +447,47 @@ class UserHandler(object):
             Question! How can we handle the date_of_birth, so that 1966-01-01 matches with 1966-1-1? 
             '''
             new_user_json = json.dumps(new_user.as_dict, default=str)
-
-            import pdb
-            pdb.set_trace()
-
-            # How do I connect with the matching service?
-            # Should I containerize the matching service, then bind it to a particular port/host?
             response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
 
-            computed_mci_threshold = response['score']
-            matched_mci_id = response['mci_id']
-
-            if computed_mci_threshold >= mci_threshold:
-                matched_individual = Individual.query.filter_by(mci_id=matched_mci_id).first()
-                
-                return {
-                    'mci_id': matched_individual.mci_id,
-                    'vendor_id': matched_individual.vendor_id,
-                    'first_name': matched_individual.first_name,
-                    'last_name': matched_individual.last_name,
-                    'match_probability': computed_mci_threshold
-                }, 200
+            if response.status_code == 201:
+                return self.handle_match_response(response=response, new_user=new_user)
             else:
-                db.session.add(new_user)
-                db.session.commit()
-
                 return {
-                    'mci_id': new_user.mci_id,
-                    'vendor_id': new_user.vendor_id,
-                    'first_name': new_user.first_name,
-                    'last_name': new_user.last_name
-                }, 201
+                    'error': 'The matching service did not return a response.'
+                }, 400        
         else:
             return {
                 'error': errors
             }, 400
+
+    def handle_match_response(self, response, new_user):
+        mci_threshold = os.getenv('MCI_THRESHOLD', 0.9)
+        match_data = response.json()
+        computed_mci_threshold = match_data['score']
+        matched_mci_id = match_data['mci_id']
+
+        if computed_mci_threshold and (computed_mci_threshold >= mci_threshold):
+            matched_individual = Individual.query.filter_by(
+                mci_id=matched_mci_id).first()
+
+            return {
+                'mci_id': matched_individual.mci_id,
+                'vendor_id': matched_individual.vendor_id,
+                'first_name': matched_individual.first_name,
+                'last_name': matched_individual.last_name,
+                'match_probability': computed_mci_threshold
+            }, 200
+
+        else:
+            db.session.add(new_user)
+            db.session.commit()
+
+            return {
+                'mci_id': new_user.mci_id,
+                'vendor_id': new_user.vendor_id,
+                'first_name': new_user.first_name,
+                'last_name': new_user.last_name
+            }, 201
 
     def get_all_users(self, offset=0, limit=20):
         """ Retrieve all users.

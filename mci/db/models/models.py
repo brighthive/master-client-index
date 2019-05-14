@@ -200,7 +200,17 @@ class Individual(db.Model):
     
     @property
     def as_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+        '''
+        Represent the Individual as a dict that uses empty strings for None values.
+        '''
+        dict_repr = {column.name: getattr(self, column.name)
+            for column in self.__table__.columns}
+        
+        for k, v in dict_repr.items():
+            if v is None:
+                dict_repr[k] = ""
+
+        return dict_repr
 
 
 class IndividualDisposition(db.Model):
