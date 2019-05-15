@@ -15,8 +15,8 @@ services:
             - postgres_mci
         networks:
             - mci_network
-        stdin_open: true
-        tty: true
+        # stdin_open: true
+        # tty: true
     postgres_mci:
         image: postgres:11.1
         ports:

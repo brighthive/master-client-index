@@ -471,6 +471,7 @@ class UserHandler(object):
                 mci_id=matched_mci_id).first()
 
             return {
+                # Should we update this individual with the new data?
                 'mci_id': matched_individual.mci_id,
                 'vendor_id': matched_individual.vendor_id,
                 'first_name': matched_individual.first_name,
