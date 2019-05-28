@@ -7,12 +7,10 @@ services:
         environment:
             - APP_ENV=SANDBOX
             - POSTGRES_USER=brighthive
-            - POSTGRES_PASSWORD=test_password
-            - POSTGRES_DATABASE=mci_dev
+            # - POSTGRES_PASSWORD=
+            - POSTGRES_DATABASE=mci_sandbox
             - POSTGRES_HOSTNAME=postgres_mci
             - POSTGRES_PORT=5432
-        depends_on:
-            - postgres_mci
         networks:
             - mci_network
         # stdin_open: true
@@ -20,11 +18,11 @@ services:
     postgres_mci:
         image: postgres:11.1
         ports:
-            - "5432:5432"
+            - "5436:5432"
         environment:
             - POSTGRES_USER=brighthive
-            - POSTGRES_PASSWORD=test_password
-            - POSTGRES_DB=mci_dev
+            - POSTGRES_PASSWORD=ydqm4LXWWtnt9m9C
+            - POSTGRES_DB=mci_sandbox
         networks:
             - mci_network
 
