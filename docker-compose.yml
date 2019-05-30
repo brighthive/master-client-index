@@ -19,3 +19,4 @@ services:
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
             - POSTGRES_DB=mci_dev
+        user: postgres

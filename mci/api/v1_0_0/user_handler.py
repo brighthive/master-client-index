@@ -12,7 +12,8 @@ from mci.config import Config
 from mci.id_factory import MasterClientIDFactory
 from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace,\
     Gender, Source, IndividualDisposition, Disposition
-from mci.app.app import db
+# from mci.app.app import db
+from mci.db.models.models import db
 from mci.helpers import build_links, validate_email, error_message
 
 

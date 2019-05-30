@@ -16,7 +16,7 @@ if [ "$APP_ENV" == "SANDBOX" ]; then
 fi
 
 if [ "$APP_ENV" == "DEVELOPMENT" ] || [ -z "$APP_ENV" ]; then
-    gunicorn -b 0.0.0.0 mci:app --reload
+    gunicorn -b 0.0.0.0 wsgi --reload
 else
-    gunicorn -b 0.0.0.0 mci:app
+    gunicorn -b 0.0.0.0 wsgi
 fi

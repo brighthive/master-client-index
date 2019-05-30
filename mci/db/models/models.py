@@ -5,7 +5,8 @@ This module contains all MCI database models.
 """
 
 from mci.id_factory import MasterClientIDFactory
-from mci.app.app import db
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
 
 class Address(db.Model):
