@@ -19,4 +19,15 @@ services:
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
             - POSTGRES_DB=mci_dev
+        ports:
+            - "5436:5432"
+        # Spinning up postgres (when decoupled from the app)
+        # assigns the db files to postgres.
+        #
+        # postgres_mci_1  | The files belonging to this database system will be owned by user "postgres".
+        # postgres_mci_1  | This user must also own the server process. 
+        # 
+        # Without a designated user, the container does not have an (unprivileged, i.e., not "root")
+        # who owns the server process. That's a problem! Because the mci container
+        # cannot connect to the database and run migrations.
         user: postgres
