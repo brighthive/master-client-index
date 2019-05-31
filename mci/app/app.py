@@ -18,8 +18,7 @@ from mci.api import (AddressResource, DispositionResource,
                      HealthCheckResource, SourceResource, UserDetailResource,
                      UserResource)
 from mci.config import ConfigurationFactory
-from mci.db.models.models import db
-
+from mci_database.db import db
 
 def create_app():
     app = Flask(__name__)

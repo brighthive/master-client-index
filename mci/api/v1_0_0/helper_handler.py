@@ -7,14 +7,15 @@ Handle user endpoint requests from the API.
 import os
 from collections import OrderedDict
 from datetime import datetime
+
+from mci_database.db import db
+from mci_database.db.models import (Address, Disposition, EducationLevel,
+                                    EmploymentStatus, EthnicityRace, Gender,
+                                    Individual, IndividualDisposition, Source)
 from sqlalchemy import func
+
 from mci.config import Config
-from mci.id_factory import MasterClientIDFactory
-from mci.db.models import Individual, Address, EducationLevel, EmploymentStatus, EthnicityRace,\
-    Gender, Source, IndividualDisposition, Disposition
-# from mci.app.app import db
-from mci.db.models.models import db
-from mci.helpers import build_links, validate_email, error_message
+from mci.helpers import build_links, error_message, validate_email
 
 
 class HelperHandler(object):

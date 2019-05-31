@@ -1,7 +1,9 @@
 #!/bin/bash
 
 MAX_RETRIES=5
-MIGRATION_PATH=mci/db/migrations
+
+# The Pipfile specifes "editable = true" (otherwise, Pip does not install non-Python files).
+MIGRATION_PATH="/master-client-index/src/mci-database/mci_database/db/migrations"
 
 if [ "$APP_ENV" == "SANDBOX" ]; then
     RETRIES=0
