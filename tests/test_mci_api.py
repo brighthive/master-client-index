@@ -16,7 +16,6 @@ class TestMCIAPI(object):
 
     def test_health_check_endpoint(self, database, test_client):
         headers = {'Authorization': 'Bearer 1qaz2wsx3edc'}
-        import pdb; pdb.set_trace()
         response = test_client.get('/health', headers=headers)
         expect(response.status_code).to(be(200))
         expect(response.json).to(
