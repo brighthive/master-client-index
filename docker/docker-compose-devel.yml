@@ -1,10 +1,32 @@
-version: '3'
+version: "3.5"
 services:
-  postgres:
-    image: postgres:11.2
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=test_user
-      - POSTGRES_PASSWORD=test_password
-      - POSTGRES_DB=master_client_index_dev
+    mci:
+        image: brighthive/master-client-index:1.0.0
+        ports:
+            - "8000:8000"
+        environment:
+            - APP_ENV=SANDBOX
+            - POSTGRES_USER=brighthive
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DATABASE=mci_dev
+            - POSTGRES_HOSTNAME=postgres_mci
+            - POSTGRES_PORT=5432
+        networks:
+            - mci_network
+        # Enables https://blog.lucasferreira.org/howto/2017/06/03/running-pdb-with-docker-and-gunicorn.html
+        stdin_open: true 
+        tty: true
+    postgres_mci:
+        image: postgres:11.1
+        ports:
+            - "5436:5432"
+        environment:
+            - POSTGRES_USER=brighthive
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DB=mci_dev
+        networks:
+            - mci_network
+# Provide a network for local development with the mci-matching-service.
+networks:
+    mci_network:
+        external: true

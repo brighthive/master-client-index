@@ -1,31 +1,21 @@
-version: "3.5"
+version: '3'
 services:
     mci:
         image: brighthive/master-client-index:1.0.0
         ports:
-            - "8000:8000"
+            - "8001:8000"
         environment:
             - APP_ENV=SANDBOX
             - POSTGRES_USER=brighthive
-            # - POSTGRES_PASSWORD=
-            - POSTGRES_DATABASE=mci_sandbox
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DATABASE=mci_dev
             - POSTGRES_HOSTNAME=postgres_mci
             - POSTGRES_PORT=5432
-        networks:
-            - mci_network
-        # stdin_open: true
-        # tty: true
+        depends_on:
+            - postgres_mci
     postgres_mci:
         image: postgres:11.1
-        ports:
-            - "5436:5432"
         environment:
             - POSTGRES_USER=brighthive
-            - POSTGRES_PASSWORD=ydqm4LXWWtnt9m9C
-            - POSTGRES_DB=mci_sandbox
-        networks:
-            - mci_network
-
-networks:
-    mci_network:
-        external: true
+            - POSTGRES_PASSWORD=test_password
+            - POSTGRES_DB=mci_dev
