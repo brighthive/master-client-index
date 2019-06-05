@@ -209,6 +209,8 @@ class Individual(db.Model):
         for k, v in dict_repr.items():
             if v is None:
                 dict_repr[k] = ""
+            else:
+                dict_repr[k] = str(v)
 
         return dict_repr
 

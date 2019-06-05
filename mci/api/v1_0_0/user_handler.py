@@ -107,9 +107,6 @@ class UserHandler(object):
 
         Return:
             dict: Response object with details about the address.
-
-
-
         """
         result = {
             'exists': False,
@@ -201,8 +198,6 @@ class UserHandler(object):
 
     def find_user_ethnicity(self, user: Individual):
         """Retrieve a user's ethnicities based on their IDs
-
-
         """
         ethnicities = []
         try:
@@ -437,15 +432,6 @@ class UserHandler(object):
 
         if len(errors) == 0:
             matching_service_uri = config.get_matching_service_uri()
-
-            '''
-            Should we pass the `user` json to `compute-matching` endpoint, and do the 
-            normalization there? Maybe not, since: (1) the matching service would need
-            to query other tables in the database, and (2) the MCI may need to create a new_user.
-
-            Soooooo....serialize the `new_user` object.
-            Question! How can we handle the date_of_birth, so that 1966-01-01 matches with 1966-1-1? 
-            '''
             new_user_json = json.dumps(new_user.as_dict, default=str)
             response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
 
@@ -471,7 +457,6 @@ class UserHandler(object):
                 mci_id=matched_mci_id).first()
 
             return {
-                # Should we update this individual with the new data?
                 'mci_id': matched_individual.mci_id,
                 'vendor_id': matched_individual.vendor_id,
                 'first_name': matched_individual.first_name,
