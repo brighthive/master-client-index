@@ -5,7 +5,7 @@ services:
         ports:
             - "8000:8000"
         environment:
-            - APP_ENV=SANDBOX
+            - APP_ENV=DEVELOPMENT
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
             - POSTGRES_DATABASE=mci_dev
