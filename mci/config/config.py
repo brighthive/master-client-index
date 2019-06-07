@@ -160,6 +160,17 @@ class Config(object):
             provider, auth_config)
         return oauth2_provider
 
+    @staticmethod
+    def get_page_limit():
+        """Retrieve the page limit from the configuration.
+
+        Returns:
+            int: Page limit (default is 20)
+
+        """
+
+        return int(os.getenv('PAGE_LIMIT', 20))
+
 class DevelopmentConfig(Config):
     """Development Configuration class.
 
