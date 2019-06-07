@@ -19,31 +19,37 @@ migrate = Migrate(app, db)
 api = Api(app)
 
 if db:
-    from mci.api import UserResource, UserDetailResource, HealthCheckResource
+    from mci.api import UserResource, UserDetailResource, HealthCheckResource, SourceResource,\
+        GenderResource, AddressResource, DispositionResource, EthnicityRaceResource,\
+        EmploymentStatusResource, EducationLevelResource
 
     # core endpoints
     api.add_resource(UserResource, '/users', endpoint='users_ep')
     api.add_resource(UserDetailResource, '/users/<mci_id>',
                      endpoint='user_detail_ep')
-    api.add_resource(HealthCheckResource, '/referrals',
-                     endpoint='referrals_ep')
 
+    # TODO: Delete this endpoints since they are now their own data resources
+    # api.add_resource(HealthCheckResource, '/referrals',
+    #                  endpoint='referrals_ep')
     # from data resource api
-    api.add_resource(HealthCheckResource, '/programs', endpoint='programs_ep')
-    api.add_resource(HealthCheckResource, '/providers',
-                     endpoint='providers_ep')
+    # api.add_resource(HealthCheckResource, '/programs', endpoint='programs_ep')
+    # api.add_resource(HealthCheckResource, '/providers',
+    #                  endpoint='providers_ep')
+    # api.add_resource(HealthCheckResource, '/status', endpoint='status_ep')
 
     # helper endpoints
     api.add_resource(HealthCheckResource, '/health', endpoint='healthcheck_ep')
-    api.add_resource(HealthCheckResource, '/sources', endpoint='sources_ep')
-    api.add_resource(HealthCheckResource, '/genders', endpoint='gender_ep')
-    api.add_resource(HealthCheckResource, '/ethnicities',
+    api.add_resource(SourceResource, '/source', endpoint='sources_ep')
+    api.add_resource(GenderResource, '/gender', endpoint='gender_ep')
+    api.add_resource(AddressResource, '/address', endpoint='address_ep')
+    api.add_resource(DispositionResource, '/disposition',
+                     endpoint='disposition_ep')
+    api.add_resource(EthnicityRaceResource, '/ethnicity',
                      endpoint='ethnicities_ep')
-    api.add_resource(HealthCheckResource, '/education',
+    api.add_resource(EmploymentStatusResource, '/employment_status',
+                     endpoint='employment_status_ep')
+    api.add_resource(EducationLevelResource, '/education_level',
                      endpoint='education_ep')
-    api.add_resource(HealthCheckResource, '/employment',
-                     endpoint='employment_ep')
-    api.add_resource(HealthCheckResource, '/status', endpoint='status_ep')
 
 
 @app.errorhandler(Exception)
