@@ -13,6 +13,7 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
 brighthive-authlib = "*"
+requests = "*"
 mci-database = {editable = true,git = "http://github.com/brighthive/mci-database.git"}
 
 [dev-packages]

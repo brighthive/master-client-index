@@ -97,6 +97,17 @@ class Config(object):
         return os.getenv('DATA_RESOURCE_URL', 'http://localhost:5000')
 
     @staticmethod
+    def get_matching_service_uri():
+        """Retrieves the URI for the mci-matching-service, which
+        listens for POST requests from MCI and returns a potential user 
+        and match score.
+
+        The matching service runs in a container, on the same Docker network as MCI,
+        and it can be accessed via the mci-matching-service container name.
+        """
+        return os.getenv('MATCHING_SERVICE_URI', 'http://mcimatchingservice_mci_1:8000/compute-match')
+
+    @staticmethod
     def get_api_version():
         """Return API version.
 
@@ -160,21 +171,15 @@ class Config(object):
 
         return int(os.getenv('PAGE_LIMIT', 20))
 
-
 class DevelopmentConfig(Config):
     """Development Configuration class.
 
     This class provides the configuration necessary for the `development` environment.
 
+    `docker/docker-compose-devel.yml` assigns values to the POSTGRES_* environment variables.
+
     Class Attributes:
-        CONTAINER_NAME (str): Label for the Docker container for the PostgreSQL container.
-
-        IMAGE_NAME (str): Name of the Docker image for the PostgreSQL database.
-
-        IMAGE_VERSION (str): Version of the Docker image for the PostgreSQL database.
-
-        POSTGRES_PORT (int): PostgreSQL port.
-
+        POSTGRES user, password, database, hostname, and port.
         SQLALCHEMY_DATABASE_URI (str): Connection string for PostgreSQL database.
     """
 
@@ -182,15 +187,15 @@ class DevelopmentConfig(Config):
         super().__init__()
         os.environ['FLASK_ENV'] = 'development'
 
-    CONTAINER_NAME = 'postgres-dev'
-    IMAGE_NAME = 'postgres'
-    IMAGE_VERSION = '11.2'
-    POSTGRES_DATABASE = 'master_client_index_dev'
-    POSTGRES_PORT = 5432
+    POSTGRES_USER = os.getenv('POSTGRES_USER')
+    POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+    POSTGRES_DATABASE = os.getenv('POSTGRES_DATABASE')
+    POSTGRES_HOSTNAME = os.getenv('POSTGRES_HOSTNAME')
+    POSTGRES_PORT = os.getenv('POSTGRES_PORT', 5432)
     SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@{}:{}/{}'.format(
-        Config.POSTGRES_USER,
-        Config.POSTGRES_PASSWORD,
-        Config.POSTGRES_HOSTNAME,
+        POSTGRES_USER,
+        POSTGRES_PASSWORD,
+        POSTGRES_HOSTNAME,
         POSTGRES_PORT,
         POSTGRES_DATABASE
     )
@@ -203,7 +208,6 @@ class DevelopmentConfig(Config):
 
         """
         return '{}:{}'.format(self.IMAGE_NAME, self.IMAGE_VERSION)
-
 
 class TestConfig(Config):
     """Test Configuration class.
