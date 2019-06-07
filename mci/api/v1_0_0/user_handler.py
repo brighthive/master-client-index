@@ -466,7 +466,6 @@ class UserHandler(object):
             }, 200
 
         else:
-            import pdb; pdb.set_trace()
             db.session.add(new_user)
             db.session.commit()
 
