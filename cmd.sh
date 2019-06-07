@@ -1,7 +1,9 @@
 #!/bin/bash
 
 MAX_RETRIES=5
-MIGRATION_PATH=mci/db/migrations
+
+# The Pipfile specifes "editable = true" (otherwise, Pip does not install non-Python files).
+MIGRATION_PATH="/master-client-index/src/mci-database/mci_database/db/migrations"
 
 if [ "$APP_ENV" == "SANDBOX" ]; then
     RETRIES=0
@@ -16,7 +18,7 @@ if [ "$APP_ENV" == "SANDBOX" ]; then
 fi
 
 if [ "$APP_ENV" == "DEVELOPMENT" ] || [ -z "$APP_ENV" ]; then
-    gunicorn -b 0.0.0.0 mci:app --reload
+    gunicorn -b 0.0.0.0 wsgi --reload
 else
-    gunicorn -b 0.0.0.0 mci:app
+    gunicorn -b 0.0.0.0 wsgi
 fi

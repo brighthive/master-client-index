@@ -9,8 +9,10 @@ import pytest
 import docker
 from flask_migrate import upgrade
 from time import sleep
+from mci_database import db
 from mci.config import ConfigurationFactory
-from mci import app, db
+from mci import create_app
+app = create_app()
 
 MAX_RETRIES = 10  # number of times to retry migrations before giving up
 SLEEP = 2  # sleep interval (seconds) between retries of migration
@@ -30,12 +32,12 @@ def apply_migrations(config):
 
     app.config.from_object(config)
     with app.app_context():
-        # determine the path of the migrations directory
-        relative_path = os.path.dirname(os.path.relpath(__file__))
-        absolute_path = os.path.dirname(os.path.abspath(__file__))
-        root_path = absolute_path.split(relative_path)[0]
+        # The migrations repo resides in the virtual env.
+        # Specifically, Pipenv installs the mci-database repo in the `src` directory,
+        # since the Pipfile marks it as "editable."
+        path_to_virtual_env = os.environ['VIRTUAL_ENV']
         migrations_dir = os.path.join(
-            root_path, 'mci', 'db', 'migrations')
+            path_to_virtual_env, 'src', 'mci-database', 'mci_database', 'db', 'migrations')
 
         while retries < MAX_RETRIES and applied_migrations is False:
             print('Attempting to apply migrations ({} of {})...'.format(
