@@ -11,6 +11,8 @@ services:
             - POSTGRES_DATABASE=mci_dev
             - POSTGRES_HOSTNAME=postgres_mci
             - POSTGRES_PORT=5432
+        depends_on:
+            - postgres_mci
         networks:
             - mci_network
         # Enables https://blog.lucasferreira.org/howto/2017/06/03/running-pdb-with-docker-and-gunicorn.html
@@ -24,6 +26,16 @@ services:
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
             - POSTGRES_DB=mci_dev
+        # Spinning up postgres (when decoupled from the app)
+        # assigns the db files to postgres.
+        #
+        # postgres_mci_1  | The files belonging to this database system will be owned by user "postgres".
+        # postgres_mci_1  | This user must also own the server process. 
+        # 
+        # Without a designated user, the container does not have an (unprivileged, i.e., not "root")
+        # who owns the server process. That's a problem! Because the mci container
+        # cannot connect to the database and run migrations.
+        user: postgres
         networks:
             - mci_network
 # Provide a network for local development with the mci-matching-service.
