@@ -38,7 +38,7 @@ class HealthCheckResource(VersionedResource):
 
         return request_handler
 
-    # @token_required(Config.get_oauth2_provider())
+    @token_required(Config.get_oauth2_provider())
     def get(self):
         """ Handle GET request from API.
 
