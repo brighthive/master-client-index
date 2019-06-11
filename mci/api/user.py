@@ -37,7 +37,7 @@ class UserResource(VersionedResource):
 
         return request_handler
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def get(self):
         """ Handle GET request from API.
 
@@ -61,7 +61,7 @@ class UserResource(VersionedResource):
 
         return self.get_request_handler(request.headers).get_all_users(offset=offset, limit=limit)
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def post(self):
         """ Handle POST request from API.
 
@@ -71,7 +71,7 @@ class UserResource(VersionedResource):
         """
         return self.get_request_handler(request.headers).create_new_user(request)
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def put(self):
         """ Handle GET request from API.
 
@@ -81,7 +81,7 @@ class UserResource(VersionedResource):
         """
         return self.get_request_handler(request.headers).get_health()
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def patch(self):
         """ Handle GET request from API.
 
@@ -91,7 +91,7 @@ class UserResource(VersionedResource):
         """
         return self.get_request_handler(request.headers).get_health()
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def delete(self):
         """ Handle GET request from API.
 
@@ -105,7 +105,7 @@ class UserResource(VersionedResource):
 class UserDetailResource(UserResource):
     """ A specific user. """
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def get(self, mci_id: str):
         return self.get_request_handler(request.headers).get_user_by_id(mci_id)
 
