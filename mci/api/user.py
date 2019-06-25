@@ -105,9 +105,9 @@ class UserResource(VersionedResource):
 class UserDetailResource(UserResource):
     """ A specific user. """
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def get(self, mci_id: str):
-        return self.get_request_handler(request.headers).get_user_by_id(mci_id)
+        return self.get_request_handler(request.headers).create_user_blob(mci_id)
 
     def post(self):
         pass
@@ -117,3 +117,11 @@ class UserDetailResource(UserResource):
 
     def delete(self):
         pass
+
+
+class UserRemovePIIResource(UserResource):
+    """ A resource for removing the PII of an individual """
+
+    # @token_required(Config.get_oauth2_provider())
+    def post(self):
+        return self.get_request_handler(request.headers).remove_pii(request)

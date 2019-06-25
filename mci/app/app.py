@@ -16,7 +16,8 @@ from mci.api import (AddressResource, DispositionResource,
                      EducationLevelResource, EmploymentStatusResource,
                      EthnicityRaceResource, GenderResource,
                      HealthCheckResource, SourceResource, UserDetailResource,
-                     UserResource)
+                     UserResource, UserRemovePIIResource)
+from mci.api.errors import IndividualDoesNotExist
 from mci.config import ConfigurationFactory
 from mci_database.db import db
 
@@ -31,6 +32,8 @@ def create_app():
     api.add_resource(UserResource, '/users', endpoint='users_ep')
     api.add_resource(UserDetailResource, '/users/<mci_id>',
                      endpoint='user_detail_ep')
+    api.add_resource(UserRemovePIIResource, '/users/remove-pii',
+                     endpoint='user_remove_pii_ep')
     # helper endpoints
     api.add_resource(HealthCheckResource, '/health', endpoint='healthcheck_ep')
     api.add_resource(SourceResource, '/source', endpoint='sources_ep')
@@ -49,6 +52,8 @@ def create_app():
     def handle_errors(e):
         if isinstance(e, OAuth2ProviderError):
             return json.dumps({'message': 'Access Denied'}), 401
+        elif isinstance(e, IndividualDoesNotExist):
+            return json.dumps({'message': 'An individual with that ID does not exist in the MCI.'}), 410
         else:
             try:
                 error_code = str(e).split(':')[0][:3].strip()
