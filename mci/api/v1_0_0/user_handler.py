@@ -59,7 +59,7 @@ class UserHandler(object):
 
         return mailing_address
 
-    def get_user(self, mci_id: str):
+    def _get_user(self, mci_id: str):
         user_obj = Individual.query.filter_by(mci_id=mci_id).first()
         if not user_obj:
             raise IndividualDoesNotExist
@@ -76,7 +76,7 @@ class UserHandler(object):
             dict, int: An object representing the specified user and the associated error code.
 
         """
-        user_obj = self.get_user(mci_id)
+        user_obj = self._get_user(mci_id)
 
         user = {
             'mci_id': user_obj.mci_id,
@@ -528,8 +528,21 @@ class UserHandler(object):
         if "comment" in json_payload.keys():
             comment = json_payload['comment']
         
-        user_obj = self.get_user(mci_id)
+        user = self._get_user(mci_id)
 
-        print(user_obj)
+        # first_name is a required field! – add dummy data "xxx"?
+        # user.first_name = None
+        user.middle_name = None
+        user.last_name = None
+        user.suffix = None
+        user.email_address = None
+        user.telephone = None
+        user.telephone_2 = None
+        user.telephone_3 = None
+        user.mailing_address_id = None
+        # dob is a required field! - add dummy data "xxx"?
+        # user.date_of_birth = None
 
-        return 200
+        db.session.commit()
+
+        return {"message": "PII removed for individual with MCI ID {}".format(mci_id)}, 200
