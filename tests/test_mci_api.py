@@ -14,16 +14,22 @@ class TestMCIAPI(object):
 
     """
 
-    def test_health_check_endpoint(self, database, test_client):
+    def test_health_check_endpoint(self, mocker, database, test_client):
+        mocker.patch(
+            'brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
         headers = {'Authorization': 'Bearer 1qaz2wsx3edc'}
         response = test_client.get('/health', headers=headers)
         expect(response.status_code).to(be(200))
         expect(response.json).to(
             have_keys('api_name', 'current_time', 'current_api_version', 'api_status'))
 
-    def test_users_endpoint(self, database, test_client):
+    def test_users_endpoint(self, mocker, database, test_client):
+        mocker.patch(
+            'brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
         response = test_client.get('/users')
-        expect(response.status_code).to(be(200))
+        assert response.status_code == 404
+        assert response.json['users'] == []
+    
         new_user = {
             'pairin_id': '1qaz2wsx3edc',
             'ssn': '999-01-1234',
@@ -47,3 +53,13 @@ class TestMCIAPI(object):
             ],
             'source': 'PAIRIN'
         }
+    
+    def test_get_user_bad_mci_id(self, mocker, database, test_client):
+        mocker.patch(
+            'brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
+        response = test_client.get('/users/123badid')
+
+        assert response.status_code == 410
+        assert response.json['message']
+        assert response.json['message'] == 'An individual with that ID does not exist in the MCI.'
+

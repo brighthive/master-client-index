@@ -105,7 +105,7 @@ class UserResource(VersionedResource):
 class UserDetailResource(UserResource):
     """ A specific user. """
 
-    # @token_required(Config.get_oauth2_provider())
+    @token_required(Config.get_oauth2_provider())
     def get(self, mci_id: str):
         return self.get_request_handler(request.headers).create_user_blob(mci_id)
 
