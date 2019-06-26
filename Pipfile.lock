@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "49524e1685dbab470050451cdf70ec7fb10ad6f02ef5fb98cb941bb2ce2e69cb"
+            "sha256": "4db396626356f408ffbcbf52541532fcf7d764eb8cd916be089124b2ddb7da2b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -180,8 +180,8 @@
         },
         "mci-database": {
             "editable": true,
-            "git": "http://github.com/brighthive/mci-database.git",
-            "ref": "7351a0bb6d7387bf8604f6c82854effe1406f3c0"
+            "git": "https://github.com/brighthive/mci-database.git",
+            "ref": "d157c928d80375125da13b1a3852ebe7aa0fc456"
         },
         "psycopg2-binary": {
             "hashes": [

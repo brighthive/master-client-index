@@ -12,6 +12,7 @@ from datetime import datetime
 import requests
 from requests.exceptions import ConnectionError
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 from mci.config import Config, ConfigurationFactory
 from mci.helpers import build_links, error_message, validate_email
@@ -19,7 +20,8 @@ from mci.api.errors import IndividualDoesNotExist
 from mci_database.db import db
 from mci_database.db.models import (Address, Disposition, EducationLevel,
                                     EmploymentStatus, EthnicityRace, Gender,
-                                    Individual, IndividualDisposition, Source)
+                                    Individual, IndividualDisposition, Source,
+                                    IndividualPIIRemoval)
 
 config = ConfigurationFactory.from_env()
 
@@ -527,13 +529,13 @@ class UserHandler(object):
             return {'message': 'Provide an MCI ID in the request body'}, 401
 
         mci_id = json_payload['mci_id']
+        comment = None
         if "comment" in json_payload.keys():
             comment = json_payload['comment']
         
         user = self._get_user(mci_id)
 
-        # first_name is a required field! – add dummy data "xxx"?
-        # user.first_name = None
+        user.first_name = None
         user.middle_name = None
         user.last_name = None
         user.suffix = None
@@ -542,9 +544,20 @@ class UserHandler(object):
         user.telephone_2 = None
         user.telephone_3 = None
         user.mailing_address_id = None
-        # dob is a required field! - add dummy data "xxx"?
-        # user.date_of_birth = None
-
+        user.date_of_birth = None
+        
         db.session.commit()
 
-        return {"message": "PII removed for individual with MCI ID {}".format(mci_id)}, 200
+        pii_removal_data = {
+            "individual_id": user.mci_id,
+            "comment": comment,
+        }
+        pii_removal = IndividualPIIRemoval(**pii_removal_data)
+        db.session.add(pii_removal)
+
+        try: 
+            db.session.commit()
+        except IntegrityError:
+            return {"message": "Nothing to do. PII has already been removed for this individual"}, 200
+            
+        return {"message": "Success! PII removed for individual with MCI ID {}".format(mci_id)}, 201
