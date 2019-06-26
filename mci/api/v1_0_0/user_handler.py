@@ -545,6 +545,7 @@ class UserHandler(object):
         user.telephone_3 = None
         user.mailing_address_id = None
         user.date_of_birth = None
+        user.ssn = None
         
         db.session.commit()
 

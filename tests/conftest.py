@@ -14,15 +14,17 @@ from flask_migrate import upgrade
 from mci import create_app
 from mci.config import ConfigurationFactory
 from mci_database import db
-from mci_database.db.models import Individual
 
+environment = os.getenv('APP_ENV', 'TEST')
+config = ConfigurationFactory.get_config(environment.upper())
 app = create_app()
+app.config.from_object(config)
 
 MAX_RETRIES = 10  # number of times to retry migrations before giving up
 SLEEP = 2  # sleep interval (seconds) between retries of migration
 
 
-def apply_migrations(config):
+def apply_migrations():
     """Apply Database Migrations
 
     Applies the database migrations to the test database container.
@@ -34,7 +36,6 @@ def apply_migrations(config):
     applied_migrations = False
     retries = 0
 
-    app.config.from_object(config)
     with app.app_context():
         # The migrations repo resides in the virtual env.
         # Specifically, Pipenv installs the mci-database repo in the `src` directory,
@@ -61,9 +62,6 @@ def setup_postgres_container():
     Spins up a Docker PostgreSQL container for testing.
 
     """
-
-    environment = os.getenv('APP_ENV', 'TEST')
-    config = ConfigurationFactory.get_config(environment.upper())
     docker_client = docker.from_env()
 
     # download Docker PostgreSQL image for unit testing only
@@ -94,7 +92,7 @@ def setup_postgres_container():
         except Exception:
             print('Unable to start container {}...'.format(config.CONTAINER_NAME))
 
-    apply_migrations(config)
+    apply_migrations()
 
 
 def teardown_postgres_container():
@@ -103,7 +101,6 @@ def teardown_postgres_container():
     Spins down the Docker PostgreSQL testing container.
 
     """
-    environment = os.getenv('APP_ENV', 'TEST')
     if environment.upper() != 'INTEGRATION':
         print('Tearing Down Docker PostgreSQL Container...')
         config = ConfigurationFactory.get_config(environment.upper())
@@ -138,5 +135,19 @@ def individual():
     return individual_data
 
 @pytest.fixture
+def json_headers():
+    mimetype = 'application/json'
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
+
+    return headers
+
+@pytest.fixture
 def test_client(scope='module'):
     return app.test_client()
+
+@pytest.fixture(scope="session")
+def app_configured():
+    return app
