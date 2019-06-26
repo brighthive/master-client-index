@@ -5,13 +5,17 @@ Contains all PyTest fixtures shared across multiple unit tests in the tests modu
 """
 
 import os
-import pytest
-import docker
-from flask_migrate import upgrade
 from time import sleep
-from mci_database import db
-from mci.config import ConfigurationFactory
+
+import docker
+import pytest
+from flask_migrate import upgrade
+
 from mci import create_app
+from mci.config import ConfigurationFactory
+from mci_database import db
+from mci_database.db.models import Individual
+
 app = create_app()
 
 MAX_RETRIES = 10  # number of times to retry migrations before giving up
@@ -118,6 +122,20 @@ def database():
     yield db
     teardown_postgres_container()
 
+@pytest.fixture
+def individual():
+    individual_data = {
+        'pairin_id': '1qaz2wsx3edc',
+        'ssn': '999-01-1234',
+        'first_name': 'Nicola',
+        'last_name': 'Haym',
+        'middle_name': 'Francesco',
+        'date_of_birth': '1678-07-06',
+        'email_address': 'nicola@ram.uk',
+        'telephone': '999-124-5678'
+    }
+
+    return individual_data
 
 @pytest.fixture
 def test_client(scope='module'):

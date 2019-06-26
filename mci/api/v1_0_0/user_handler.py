@@ -10,6 +10,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 import requests
+from requests.exceptions import ConnectionError
 from sqlalchemy import func
 
 from mci.config import Config, ConfigurationFactory
@@ -345,7 +346,7 @@ class UserHandler(object):
         if 'vendor_id' in user.keys():
             new_user.vendor_id = user['vendor_id']
         if 'ssn' in user.keys():
-            new_user.ssn = user['ssn']
+            new_user.ssn = user['ssn'].replace('-', '')
         if 'first_name' in user.keys():
             new_user.first_name = user['first_name'].title()
         if 'suffix' in user.keys():
@@ -432,17 +433,18 @@ class UserHandler(object):
                     else:
                         new_user.dispositions.append(disposition['object'])
 
+
         if len(errors) == 0:
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
-            response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
-
-            if response.status_code == 201:
-                return self._handle_match_response(response=response, new_user=new_user)
-            else:
+            try:
+                response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
+            except ConnectionError:
                 return {
                     'error': 'The matching service did not return a response.'
                 }, 400        
+            else:
+                return self._handle_match_response(response=response, new_user=new_user)
         else:
             return {
                 'error': errors

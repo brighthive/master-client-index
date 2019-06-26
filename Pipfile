@@ -23,6 +23,7 @@ pytest-cov = "*"
 docker = "*"
 sphinx = "*"
 pytest-mock = "*"
+requests-mock = "*"
 
 [requires]
 python_version = "3.7"
