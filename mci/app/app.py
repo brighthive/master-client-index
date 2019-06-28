@@ -7,7 +7,7 @@ This module houses the core Flask application.
 import json
 
 from brighthive_authlib import OAuth2ProviderError
-from flask import Flask
+from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
@@ -16,7 +16,8 @@ from mci.api import (AddressResource, DispositionResource,
                      EducationLevelResource, EmploymentStatusResource,
                      EthnicityRaceResource, GenderResource,
                      HealthCheckResource, SourceResource, UserDetailResource,
-                     UserResource)
+                     UserResource, UserRemovePIIResource)
+from mci.api.errors import IndividualDoesNotExist
 from mci.config import ConfigurationFactory
 from mci_database.db import db
 
@@ -31,6 +32,8 @@ def create_app():
     api.add_resource(UserResource, '/users', endpoint='users_ep')
     api.add_resource(UserDetailResource, '/users/<mci_id>',
                      endpoint='user_detail_ep')
+    api.add_resource(UserRemovePIIResource, '/users/remove-pii',
+                     endpoint='user_remove_pii_ep')
     # helper endpoints
     api.add_resource(HealthCheckResource, '/health', endpoint='healthcheck_ep')
     api.add_resource(SourceResource, '/source', endpoint='sources_ep')
@@ -48,17 +51,28 @@ def create_app():
     @app.errorhandler(Exception)
     def handle_errors(e):
         if isinstance(e, OAuth2ProviderError):
-            return json.dumps({'message': 'Access Denied'}), 401
+            response = jsonify({'message': 'Access Denied'})
+            response.status_code = 401
+            return response
+        elif isinstance(e, IndividualDoesNotExist):
+            response = jsonify(
+                {'message': 'An individual with that ID does not exist in the MCI.'})
+            response.status_code = 410
+            return response
         else:
             try:
                 error_code = str(e).split(':')[0][:3].strip()
                 error_text = str(e).split(':')[0][3:].strip()
                 if isinstance(error_code, int):
-                    return json.dumps({'error': error_text}), error_code
+                    response = jsonify({'error': error_text})
+                    response.status_code = error_code
+                    return response
                 else:
                     raise Exception
             except Exception as e:
                 print(e)
-                return json.dumps({'error': 'An unknown error occured'}), 400
+                response = jsonify({'error': 'An unknown error occured'})
+                response.status_code = 400
+                return response
     
     return app

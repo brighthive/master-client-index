@@ -3,7 +3,8 @@ from mci.api.v1_0_0.healthcheck_handler import HealthCheckHandler as V1_0_0_Heal
 from mci.api.v1_0_0.user_handler import UserHandler as V1_0_0_UserHandler
 from mci.api.v1_0_0.helper_handler import HelperHandler as V1_0_0_HelperHandler
 from mci.api.healthcheck import HealthCheckResource
-from mci.api.user import UserResource, UserDetailResource
+from mci.api.errors import IndividualDoesNotExist
+from mci.api.user import UserResource, UserDetailResource, UserRemovePIIResource
 from mci.api.helpers import SourceResource, GenderResource, AddressResource,\
     DispositionResource, EthnicityRaceResource, EmploymentStatusResource,\
     EducationLevelResource
