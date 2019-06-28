@@ -8,13 +8,14 @@ pycodestyle = "*"
 "autopep8" = "*"
 flask = "*"
 flask-restful = "*"
-gunicorn = "*"
+gunicorn = {extras = ["gevent"], version = "*"}
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
 brighthive-authlib = "*"
 requests = "*"
 mci-database = {editable = true,git = "http://github.com/brighthive/mci-database.git"}
+gevent = "*"
 
 [dev-packages]
 expects = "*"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 MAX_RETRIES=5
+WORKERS=4
 
 # The Pipfile specifes "editable = true" (otherwise, Pip does not install non-Python files).
 MIGRATION_PATH="/master-client-index/src/mci-database/mci_database/db/migrations"
@@ -16,7 +17,7 @@ until flask db upgrade -d $MIGRATION_PATH; do
 done
 
 if [ "$APP_ENV" == "DEVELOPMENT" ] || [ -z "$APP_ENV" ]; then
-    gunicorn -b 0.0.0.0 wsgi --reload --log-level=DEBUG --timeout 240
+    gunicorn -b 0.0.0.0 wsgi --reload --log-level=DEBUG --timeout 240 --worker-class gevent
 else
-    gunicorn -b 0.0.0.0 wsgi
+    gunicorn -b 0.0.0.0 wsgi --workers=$WORKERS --worker-class gevent
 fi
