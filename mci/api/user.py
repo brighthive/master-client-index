@@ -122,6 +122,6 @@ class UserDetailResource(UserResource):
 class UserRemovePIIResource(UserResource):
     """ A resource for removing the PII of an individual """
 
-    @token_required(Config.get_oauth2_provider())
+    # @token_required(Config.get_oauth2_provider())
     def post(self):
         return self.get_request_handler(request.headers).remove_pii(request)

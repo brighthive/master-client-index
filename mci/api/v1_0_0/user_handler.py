@@ -435,7 +435,6 @@ class UserHandler(object):
                     else:
                         new_user.dispositions.append(disposition['object'])
 
-
         if len(errors) == 0:
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
@@ -525,10 +524,12 @@ class UserHandler(object):
 
     def remove_pii(self, request):
         json_payload = request.json
-        if not json_payload or 'mci_id' not in json_payload.keys():
-            return {'message': 'Provide an MCI ID in the request body'}, 401
 
-        mci_id = json_payload['mci_id']
+        try:
+            mci_id = json_payload['mci_id'] 
+        except Exception:
+            return {'message': 'Malformed or empty JSON object found. Please include JSON with an mci_id in the request body.'}, 400
+        
         comment = None
         if "comment" in json_payload.keys():
             comment = json_payload['comment']

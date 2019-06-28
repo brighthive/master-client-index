@@ -158,7 +158,6 @@ class Config(object):
             provider=provider, base_url=oauth2_url, jwks_url=json_url, algorithms=algorithms, audience=audience)
         oauth2_provider = OAuth2ProviderFactory.get_provider(
             provider, auth_config)
-        
         return oauth2_provider
 
     @staticmethod
