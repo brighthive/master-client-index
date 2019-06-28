@@ -10,14 +10,18 @@ from collections import OrderedDict
 from datetime import datetime
 
 import requests
+from requests.exceptions import ConnectionError
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 from mci.config import Config, ConfigurationFactory
 from mci.helpers import build_links, error_message, validate_email
+from mci.api.errors import IndividualDoesNotExist
 from mci_database.db import db
 from mci_database.db.models import (Address, Disposition, EducationLevel,
                                     EmploymentStatus, EthnicityRace, Gender,
-                                    Individual, IndividualDisposition, Source)
+                                    Individual, IndividualDisposition, Source,
+                                    IndividualPIIRemoval)
 
 config = ConfigurationFactory.from_env()
 
@@ -58,7 +62,14 @@ class UserHandler(object):
 
         return mailing_address
 
-    def get_user_by_id(self, mci_id: str):
+    def _get_user(self, mci_id: str):
+        user_obj = Individual.query.filter_by(mci_id=mci_id).first()
+        if not user_obj:
+            raise IndividualDoesNotExist
+        
+        return user_obj
+
+    def create_user_blob(self, mci_id: str):
         """Look up a user by their MCI ID.
 
         Args:
@@ -68,35 +79,28 @@ class UserHandler(object):
             dict, int: An object representing the specified user and the associated error code.
 
         """
+        user_obj = self._get_user(mci_id)
 
-        try:
-            user_obj = Individual.query.filter_by(mci_id=mci_id).first()
-            if user_obj is None:
-                raise Exception
-            else:
-                user = {
-                    'mci_id': user_obj.mci_id,
-                    'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
-                    'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
-                    # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
-                    'first_name': '' if user_obj.first_name is None else user_obj.first_name,
-                    'suffix': '' if user_obj.suffix is None else user_obj.suffix,
-                    'last_name': '' if user_obj.last_name is None else user_obj.last_name,
-                    'middle_name': '' if user_obj.middle_name is None else user_obj.middle_name,
-                    'mailing_address': self.get_mailing_address(user_obj),
-                    'date_of_birth': '' if user_obj.date_of_birth is None else str(user_obj.date_of_birth),
-                    'email_address': '' if user_obj.email_address is None else user_obj.email_address,
-                    'telephone': '' if user_obj.telephone is None else user_obj.telephone,
-                    'gender': self.find_gender_type(user_obj),
-                    'ethnicity_race': self.find_user_ethnicity(user_obj),
-                    'education_level': '',
-                    'employment_status': self.find_employment_status_type(user_obj),
-                    'source': self.find_source_type(user_obj)
-                }
-                return user, 200
-        except Exception as e:
-            print('Exception is {}'.format(e))
-            return {'error': 'Cannot find user with MCI ID {}'.format(mci_id)}, 404
+        user = {
+            'mci_id': user_obj.mci_id,
+            'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
+            'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
+            # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
+            'first_name': '' if user_obj.first_name is None else user_obj.first_name,
+            'suffix': '' if user_obj.suffix is None else user_obj.suffix,
+            'last_name': '' if user_obj.last_name is None else user_obj.last_name,
+            'middle_name': '' if user_obj.middle_name is None else user_obj.middle_name,
+            'mailing_address': self.get_mailing_address(user_obj),
+            'date_of_birth': '' if user_obj.date_of_birth is None else str(user_obj.date_of_birth),
+            'email_address': '' if user_obj.email_address is None else user_obj.email_address,
+            'telephone': '' if user_obj.telephone is None else user_obj.telephone,
+            'gender': self.find_gender_type(user_obj),
+            'ethnicity_race': self.find_user_ethnicity(user_obj),
+            'education_level': '',
+            'employment_status': self.find_employment_status_type(user_obj),
+            'source': self.find_source_type(user_obj)
+        }
+        return user, 200
 
     def find_address_id(self, address):
         """Look up address.
@@ -344,7 +348,7 @@ class UserHandler(object):
         if 'vendor_id' in user.keys():
             new_user.vendor_id = user['vendor_id']
         if 'ssn' in user.keys():
-            new_user.ssn = user['ssn']
+            new_user.ssn = user['ssn'].replace('-', '')
         if 'first_name' in user.keys():
             new_user.first_name = user['first_name'].title()
         if 'suffix' in user.keys():
@@ -434,20 +438,20 @@ class UserHandler(object):
         if len(errors) == 0:
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
-            response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
-
-            if response.status_code == 201:
-                return self.handle_match_response(response=response, new_user=new_user)
-            else:
+            try:
+                response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
+            except ConnectionError:
                 return {
                     'error': 'The matching service did not return a response.'
                 }, 400        
+            else:
+                return self._handle_match_response(response=response, new_user=new_user)
         else:
             return {
                 'error': errors
             }, 400
 
-    def handle_match_response(self, response, new_user):
+    def _handle_match_response(self, response, new_user):
         mci_threshold = os.getenv('MCI_THRESHOLD', 0.9)
         match_data = response.json()
         computed_mci_threshold = match_data['score']
@@ -517,3 +521,45 @@ class UserHandler(object):
 
         response['links'] = links
         return response, status_code
+
+    def remove_pii(self, request):
+        json_payload = request.json
+
+        try:
+            mci_id = json_payload['mci_id'] 
+        except Exception:
+            return {'message': 'Malformed or empty JSON object found. Please include JSON with an mci_id in the request body.'}, 400
+        
+        comment = None
+        if "comment" in json_payload.keys():
+            comment = json_payload['comment']
+        
+        user = self._get_user(mci_id)
+
+        user.first_name = None
+        user.middle_name = None
+        user.last_name = None
+        user.suffix = None
+        user.email_address = None
+        user.telephone = None
+        user.telephone_2 = None
+        user.telephone_3 = None
+        user.mailing_address_id = None
+        user.date_of_birth = None
+        user.ssn = None
+        
+        db.session.commit()
+
+        pii_removal_data = {
+            "individual_id": user.mci_id,
+            "comment": comment,
+        }
+        pii_removal = IndividualPIIRemoval(**pii_removal_data)
+        db.session.add(pii_removal)
+
+        try: 
+            db.session.commit()
+        except IntegrityError:
+            return {"message": "Nothing to do. PII has already been removed for this individual"}, 200
+            
+        return {"message": "Success! PII removed for individual with MCI ID {}".format(mci_id)}, 201

@@ -14,8 +14,8 @@ flask-migrate = "*"
 "psycopg2-binary" = "*"
 brighthive-authlib = "*"
 requests = "*"
-mci-database = {editable = true,git = "http://github.com/brighthive/mci-database.git"}
 gevent = "*"
+mci-database = {editable = true, ref = "master", git = "https://github.com/brighthive/mci-database.git"}
 
 [dev-packages]
 expects = "*"
@@ -23,6 +23,8 @@ pytest = "*"
 pytest-cov = "*"
 docker = "*"
 sphinx = "*"
+pytest-mock = "*"
+requests-mock = "*"
 
 [requires]
 python_version = "3.7"
