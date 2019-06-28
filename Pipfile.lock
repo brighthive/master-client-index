@@ -181,7 +181,7 @@
         "mci-database": {
             "editable": true,
             "git": "https://github.com/brighthive/mci-database.git",
-            "ref": "d157c928d80375125da13b1a3852ebe7aa0fc456"
+            "ref": "8c197cf82a542a256b18c859faf76918b8fa9f4e"
         },
         "psycopg2-binary": {
             "hashes": [
