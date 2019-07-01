@@ -21,6 +21,33 @@ from mci.api.errors import IndividualDoesNotExist
 from mci.config import ConfigurationFactory
 from mci_database.db import db
 
+def handle_errors(e):
+    if isinstance(e, OAuth2ProviderError):
+        response = jsonify({'message': 'Access Denied'})
+        response.status_code = 401
+        return response
+    elif isinstance(e, IndividualDoesNotExist):
+        response = jsonify(
+            {'message': 'An individual with that ID does not exist in the MCI.'})
+        response.status_code = 410
+        return response
+    else:
+        try:
+            error_code = str(e).split(':')[0][:3].strip()
+            error_text = str(e).split(':')[0][3:].strip()
+            if isinstance(error_code, int):
+                response = jsonify({'error': error_text})
+                response.status_code = error_code
+                return response
+            else:
+                raise Exception
+        except Exception as e:
+            print(e)
+            response = jsonify({'error': 'An unknown error occured'})
+            response.status_code = 400
+            return response
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(ConfigurationFactory.from_env())
@@ -48,31 +75,5 @@ def create_app():
     api.add_resource(EducationLevelResource, '/education_level',
                      endpoint='education_ep')
 
-    @app.errorhandler(Exception)
-    def handle_errors(e):
-        if isinstance(e, OAuth2ProviderError):
-            response = jsonify({'message': 'Access Denied'})
-            response.status_code = 401
-            return response
-        elif isinstance(e, IndividualDoesNotExist):
-            response = jsonify(
-                {'message': 'An individual with that ID does not exist in the MCI.'})
-            response.status_code = 410
-            return response
-        else:
-            try:
-                error_code = str(e).split(':')[0][:3].strip()
-                error_text = str(e).split(':')[0][3:].strip()
-                if isinstance(error_code, int):
-                    response = jsonify({'error': error_text})
-                    response.status_code = error_code
-                    return response
-                else:
-                    raise Exception
-            except Exception as e:
-                print(e)
-                response = jsonify({'error': 'An unknown error occured'})
-                response.status_code = 400
-                return response
-    
+    app.register_error_handler(Exception, handle_errors)
     return app

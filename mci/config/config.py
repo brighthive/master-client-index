@@ -69,6 +69,13 @@ class Config(object):
         POSTGRES_DATABASE
     )
 
+    # OAuth 2.0 Settings
+    OAUTH2_PROVIDER = os.getenv('OAUTH2_PROVIDER', 'AUTH0')
+    OAUTH2_URL = os.getenv('OAUTH2_URL', 'https://brighthive-test.auth0.com')
+    OAUTH2_JWKS_URL = '{}/.well-known/jwks.json'.format(OAUTH2_URL)
+    OAUTH2_AUDIENCE = os.getenv('OAUTH2_AUDIENCE', 'http://localhost:8000')
+    OAUTH2_ALGORITHMS = ['RS256']
+
     @staticmethod
     def get_settings():
         """Retrieve application settings from local settings file.
@@ -145,19 +152,14 @@ class Config(object):
 
     @staticmethod
     def get_oauth2_provider():
-        """Get the OAuth 2.0 provider.
-
+        """Retrieve the OAuth 2.0 Provider.
+        Return:
+            object: The OAuth 2.0 Provider.
         """
-        # OAuth 2.0
-        provider = 'AUTH0'
-        oauth2_url = 'https://brighthive-test.auth0.com'
-        json_url = '{}/.well-known/jwks.json'.format(oauth2_url)
-        audience = 'http://localhost:8000'
-        algorithms = ['RS256']
-        auth_config = AuthLibConfiguration(
-            provider=provider, base_url=oauth2_url, jwks_url=json_url, algorithms=algorithms, audience=audience)
+        auth_config = AuthLibConfiguration(provider=Config.OAUTH2_PROVIDER, base_url=Config.OAUTH2_URL,
+                                           jwks_url=Config.OAUTH2_JWKS_URL, algorithms=Config.OAUTH2_ALGORITHMS, audience=Config.OAUTH2_AUDIENCE)
         oauth2_provider = OAuth2ProviderFactory.get_provider(
-            provider, auth_config)
+            Config.OAUTH2_PROVIDER, auth_config)
         return oauth2_provider
 
     @staticmethod
@@ -170,6 +172,7 @@ class Config(object):
         """
 
         return int(os.getenv('PAGE_LIMIT', 20))
+
 
 class DevelopmentConfig(Config):
     """Development Configuration class.
@@ -208,6 +211,7 @@ class DevelopmentConfig(Config):
 
         """
         return '{}:{}'.format(self.IMAGE_NAME, self.IMAGE_VERSION)
+
 
 class TestConfig(Config):
     """Test Configuration class.
@@ -284,6 +288,8 @@ class SandboxConfig(Config):
         super().__init__()
         os.environ['FLASK_ENV'] = 'production'
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PROPAGATE_EXCEPTIONS = True
     POSTGRES_USER = os.getenv('POSTGRES_USER')
     POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
     POSTGRES_DATABASE = os.getenv('POSTGRES_DATABASE')
