@@ -57,7 +57,7 @@ class TestMCIAPI(object):
         assert response.json
     
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
-    def test_post_existing_user(self, mocker, database, individual, test_client, json_headers):
+    def test_post_user_existing(self, mocker, database, individual, test_client, json_headers):
         '''
         Tests that POSTing an existing user returns a 200 with correct user information.
         '''        
@@ -74,6 +74,22 @@ class TestMCIAPI(object):
         assert response.json['last_name'] == individual['last_name']
         assert response.json['mci_id'] == new_individual['mci_id']
         assert response.json['match_probability'] == 10.0
+
+    @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
+    def test_post_user_bad_json(self, individual, test_client, json_headers):
+        with requests_mock.Mocker() as m:
+            m.post("http://mcimatchingservice_mci_1:8000/compute-match",
+                  json={"mci_id": "", "score": ""}, status_code=201)
+
+            bad_json = {
+                'first_name': "Single",
+                'middle_name': "Quote",
+                'last_name': "Mistake",
+            }
+
+            response = test_client.post('/users', data=bad_json, headers=json_headers)
+            assert response.status_code == 400
+            assert response.json['error'] == 'Malformed or empty JSON object found in request body.'
 
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
     def test_remove_pii_invalid_id(self, mocker, database, individual, test_client, json_headers):
