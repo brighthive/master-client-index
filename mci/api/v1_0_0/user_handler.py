@@ -439,6 +439,7 @@ class UserHandler(object):
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
             try:
+                import pdb; pdb.set_trace()
                 response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
             except ConnectionError:
                 return {
