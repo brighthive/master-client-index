@@ -320,12 +320,14 @@ class UserHandler(object):
             'id': None,
             'error': None
         }
+
         try:
-            new_address = Address(address['address'].title(),
-                                  address['city'].title(),
-                                  address['state'].upper(),
-                                  address['postal_code'],
-                                  address['country'].upper())
+            new_address = Address(address.get('address', '').title(),
+                                  address.get('city', '').title(),
+                                  address.get('state', '').upper(),
+                                  address.get('postal_code', ''),
+                                  address.get('country', '').upper())
+
             address = Address.query.filter_by(address=new_address.address, city=new_address.city,
                                               state=new_address.state, postal_code=new_address.postal_code,
                                               country=new_address.country).first()
@@ -342,7 +344,7 @@ class UserHandler(object):
         return result
 
     def _find_gender_id(self, gender_type: str):
-        """Locate Gender ID based on it's value.
+        """Locate Gender ID based on its value.
 
         Args:
             gender_type: Gender type value to look up.
