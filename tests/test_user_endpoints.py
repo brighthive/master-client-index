@@ -9,6 +9,8 @@ from mci import app
 from mci_database import db
 from mci_database.db.models import Individual
 
+from .utils import post_new_individual
+
 class TestMCIAPI(object):
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
     def test_users_endpoint_empty(self, mocker, database, test_client):
@@ -25,7 +27,7 @@ class TestMCIAPI(object):
         '''
         Tests that the users endpoint returns expected content when the database has Individual entries.
         '''
-        self._post_new_individual(individual_data, test_client, json_headers)
+        post_new_individual(individual_data, test_client, json_headers)
 
         response = test_client.get('/users')
 
@@ -49,7 +51,7 @@ class TestMCIAPI(object):
         '''
         Tests that GETing a valid user returns the JSON and 200 status code.
         '''
-        new_individual = self._post_new_individual(individual_data, test_client, json_headers)
+        new_individual = post_new_individual(individual_data, test_client, json_headers)
 
         response = test_client.get('/users/{}'.format(new_individual['mci_id']))
 
@@ -61,7 +63,7 @@ class TestMCIAPI(object):
         '''
         Tests that POSTing an existing user returns a 200 with correct user information.
         '''        
-        new_individual = self._post_new_individual(individual_data, test_client, json_headers)
+        new_individual = post_new_individual(individual_data, test_client, json_headers)
 
         with requests_mock.Mocker() as m:
             m.post("http://mcimatchingservice_mci_1:8000/compute-match",
@@ -108,7 +110,7 @@ class TestMCIAPI(object):
     
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
     def test_remove_pii_valid_id(self, mocker, app_configured, database, individual_data, test_client, json_headers):
-        new_individual = self._post_new_individual(individual_data, test_client, json_headers)
+        new_individual = post_new_individual(individual_data, test_client, json_headers)
         
         with app_configured.app_context():
             assert database.session.query(Individual).filter_by(first_name=individual_data['first_name']).first()
@@ -128,20 +130,3 @@ class TestMCIAPI(object):
             assert updated_individual.email_address == None
             assert updated_individual.telephone == None
             assert updated_individual.ssn == None
-
-    def _post_new_individual(self, individual_data, test_client, headers):
-        '''
-        Helper function for posting a new Individual to the MCI.
-        Returns the JSON for the newly created Individual.
-        '''
-        with requests_mock.Mocker() as m:
-            m.post("http://mcimatchingservice_mci_1:8000/compute-match",
-                  json={"mci_id": "", "score": ""}, status_code=201)
-
-            response = test_client.post('/users', data=json.dumps(individual_data), headers=headers)
-
-            assert response.status_code == 201
-            assert response.json['first_name'] == individual_data['first_name']
-            assert response.json['last_name'] == individual_data['last_name']
-        
-        return response.json
