@@ -122,8 +122,6 @@ def database():
 @pytest.fixture
 def individual():
     individual_data = {
-        'pairin_id': '1qaz2wsx3edc',
-        'ssn': '999-01-1234',
         'first_name': 'Nicola',
         'last_name': 'Haym',
         'middle_name': 'Francesco',
