@@ -1,0 +1,37 @@
+version: "3"
+services:
+  mci:
+    image: 396527728813.dkr.ecr.us-east-2.amazonaws.com/brighthive/master-client-index
+    ports: 
+    - 8000:8000
+    depends_on: 
+    - postgres
+    environment:
+      - APP_ENV=SANDBOX
+      - POSTGRES_USER=brighthive
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DATABASE=mci_dev
+      - POSTGRES_PORT=5432
+      - WORKERS=4
+      - POSTGRES_HOSTNAME=postgres
+      - MATCHING_SERVICE_URI=http://mci-matching-service:8000
+    stdin_open: true 
+    tty: true
+  mci-matching-service:
+    image: 396527728813.dkr.ecr.us-east-2.amazonaws.com/brighthive/mci-matching-service 
+    environment:
+      # - APP_ENV=PRODUCTION
+      - APP_ENV=SANDBOX
+      - POSTGRES_USER=brighthive
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DATABASE=mci_dev
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOSTNAME=postgres
+    stdin_open: true 
+    tty: true
+  postgres:
+    image: postgres:11.1
+    environment: 
+      - POSTGRES_USER=brighthive
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=mci_dev
