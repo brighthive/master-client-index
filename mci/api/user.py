@@ -61,7 +61,7 @@ class UserResource(VersionedResource):
 
         return self.get_request_handler(request.headers).get_all_users(offset=offset, limit=limit)
 
-    # @token_required(Config.get_oauth2_provider())
+    @token_required(Config.get_oauth2_provider())
     def post(self):
         """ Handle POST request from API.
 

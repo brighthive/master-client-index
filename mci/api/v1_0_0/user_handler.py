@@ -337,7 +337,6 @@ class UserHandler(object):
 
     def create_new_user(self, user_object):
         """ Creates a new user. """
-        import pdb; pdb.set_trace()
         errors = []
         try:
             user = user_object.json
