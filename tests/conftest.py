@@ -14,6 +14,9 @@ from flask_migrate import upgrade
 from mci import create_app
 from mci.config import ConfigurationFactory
 from mci_database import db
+from mci_database.db.models import (Address, Disposition, EducationLevel,
+                                    EmploymentStatus, EthnicityRace, Gender,
+                                    Individual)
 
 environment = os.getenv('APP_ENV', 'TEST')
 config = ConfigurationFactory.get_config(environment.upper())
@@ -119,11 +122,14 @@ def database():
     yield db
     teardown_postgres_container()
 
+
 @pytest.fixture
-def individual():
-    individual_data = {
-        'pairin_id': '1qaz2wsx3edc',
-        'ssn': '999-01-1234',
+def app_context():
+    with app.app_context() as context:
+        yield context
+
+def _individual():
+    individual = {
         'first_name': 'Nicola',
         'last_name': 'Haym',
         'middle_name': 'Francesco',
@@ -132,7 +138,88 @@ def individual():
         'telephone': '999-124-5678'
     }
 
-    return individual_data
+    return individual
+
+@pytest.fixture
+def individual_data():
+    '''
+    Returns a blob of data. 
+    Ideal for POSTing an individual to the `users` endpoint.
+    '''
+    return _individual()
+
+@pytest.fixture
+def individual_obj(database, mailing_address_obj, app_context):
+    '''
+    Populates the database with an Individual and returns its MCI ID.
+    '''
+    individual_obj = Individual(**_individual())
+    individual_obj.mailing_address_id = 1
+    mci_id = individual_obj.mci_id
+
+    database.session.add(individual_obj) 
+    database.session.commit()
+        
+    return mci_id
+    
+@pytest.fixture
+def mailing_address_obj(database, app_context):
+    address_data = {
+        'address': '25 Brook St',
+        'city': 'London',
+    }
+
+    mailing_address_obj = Address(**address_data)
+
+    database.session.add(mailing_address_obj) 
+    database.session.commit()
+    
+    return mailing_address_obj
+
+@pytest.fixture
+def gender_obj(database, app_context):
+    gender_obj = Gender(gender='Female')
+
+    database.session.add(gender_obj) 
+    database.session.commit()
+    
+    return gender_obj
+
+@pytest.fixture
+def ethnicity_obj(database, app_context):
+    ethnicity_obj = EthnicityRace(ethnicity_race='Alaska Native')
+
+    database.session.add(ethnicity_obj) 
+    database.session.commit()
+    
+    return ethnicity_obj
+
+@pytest.fixture
+def education_obj(database, app_context):
+    education_obj = EducationLevel(education_level='Masters')
+
+    database.session.add(education_obj) 
+    database.session.commit()
+    
+    return education_obj
+
+@pytest.fixture
+def employment_obj(database, app_context):
+    employment_obj = EmploymentStatus(employment_status='Employed')
+
+    database.session.add(employment_obj) 
+    database.session.commit()
+    
+    return employment_obj
+
+@pytest.fixture
+def disposition_obj(database, app_context):
+    disposition_obj = Disposition(disposition='student')
+
+    database.session.add(disposition_obj) 
+    database.session.commit()
+    
+    return disposition_obj
 
 @pytest.fixture
 def json_headers():
@@ -147,7 +234,3 @@ def json_headers():
 @pytest.fixture
 def test_client(scope='module'):
     return app.test_client()
-
-@pytest.fixture(scope="session")
-def app_configured():
-    return app
