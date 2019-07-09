@@ -122,10 +122,11 @@ def database():
     yield db
     teardown_postgres_container()
 
-def _add_to_database(entry):
-    with app.app_context():
-        database.session.add(entry) 
-        database.session.commit()
+
+@pytest.fixture(scope="session")
+def app_context():
+    with app.app_context() as context:
+        yield context
 
 def _individual():
     individual = {
@@ -148,7 +149,7 @@ def individual_data():
     return _individual()
 
 @pytest.fixture
-def individual_obj(database, mailing_address_obj):
+def individual_obj(database, mailing_address_obj, app_context):
     '''
     Populates the database with an Individual and returns its MCI ID.
     '''
@@ -156,14 +157,13 @@ def individual_obj(database, mailing_address_obj):
     individual_obj.mailing_address_id = 1
     mci_id = individual_obj.mci_id
 
-    with app.app_context():
-        database.session.add(individual_obj) 
-        database.session.commit()
+    database.session.add(individual_obj) 
+    database.session.commit()
         
     return mci_id
     
 @pytest.fixture
-def mailing_address_obj(database):
+def mailing_address_obj(database, app_context):
     address_data = {
         'address': '25 Brook St',
         'city': 'London',
@@ -171,59 +171,53 @@ def mailing_address_obj(database):
 
     mailing_address_obj = Address(**address_data)
 
-    with app.app_context():
-        database.session.add(mailing_address_obj) 
-        database.session.commit()
+    database.session.add(mailing_address_obj) 
+    database.session.commit()
     
     return mailing_address_obj
 
 @pytest.fixture
-def gender_obj(database):
+def gender_obj(database, app_context):
     gender_obj = Gender(gender='Female')
 
-    with app.app_context():
-        database.session.add(gender_obj) 
-        database.session.commit()
+    database.session.add(gender_obj) 
+    database.session.commit()
     
     return gender_obj
 
 @pytest.fixture
-def ethnicity_obj(database):
+def ethnicity_obj(database, app_context):
     ethnicity_obj = EthnicityRace(ethnicity_race='Alaska Native')
 
-    with app.app_context():
-        database.session.add(ethnicity_obj) 
-        database.session.commit()
+    database.session.add(ethnicity_obj) 
+    database.session.commit()
     
     return ethnicity_obj
 
 @pytest.fixture
-def education_obj(database):
+def education_obj(database, app_context):
     education_obj = EducationLevel(education_level='Masters')
 
-    with app.app_context():
-        database.session.add(education_obj) 
-        database.session.commit()
+    database.session.add(education_obj) 
+    database.session.commit()
     
     return education_obj
 
 @pytest.fixture
-def employment_obj(database):
+def employment_obj(database, app_context):
     employment_obj = EmploymentStatus(employment_status='Employed')
 
-    with app.app_context():
-        database.session.add(employment_obj) 
-        database.session.commit()
+    database.session.add(employment_obj) 
+    database.session.commit()
     
     return employment_obj
 
 @pytest.fixture
-def disposition_obj(database):
+def disposition_obj(database, app_context):
     disposition_obj = Disposition(disposition='student')
 
-    with app.app_context():
-        database.session.add(disposition_obj) 
-        database.session.commit()
+    database.session.add(disposition_obj) 
+    database.session.commit()
     
     return disposition_obj
 
@@ -240,7 +234,3 @@ def json_headers():
 @pytest.fixture
 def test_client(scope='module'):
     return app.test_client()
-
-@pytest.fixture(scope="session")
-def app_configured():
-    return app

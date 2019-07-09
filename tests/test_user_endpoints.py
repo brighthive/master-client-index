@@ -109,24 +109,23 @@ class TestMCIAPI(object):
         assert response.json['message'] == 'An individual with that ID does not exist in the MCI.'
     
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
-    def test_remove_pii_valid_id(self, mocker, app_configured, database, individual_data, test_client, json_headers):
+    def test_remove_pii_valid_id(self, mocker, app_context, database, individual_data, test_client, json_headers):
         new_individual = post_new_individual(individual_data, test_client, json_headers)
         
-        with app_configured.app_context():
-            assert database.session.query(Individual).filter_by(first_name=individual_data['first_name']).first()
+        assert database.session.query(Individual).filter_by(first_name=individual_data['first_name']).first()
 
-            response = test_client.post(
-                '/users/remove-pii',
-                data=json.dumps({"mci_id": new_individual['mci_id']}),
-                headers=json_headers)
+        response = test_client.post(
+            '/users/remove-pii',
+            data=json.dumps({"mci_id": new_individual['mci_id']}),
+            headers=json_headers)
 
-            assert response.status_code == 201
+        assert response.status_code == 201
 
-            updated_individual = database.session.query(Individual).filter_by(mci_id=new_individual['mci_id']).first()
-            assert updated_individual.first_name == None
-            assert updated_individual.last_name == None
-            assert updated_individual.middle_name == None
-            assert updated_individual.date_of_birth == None
-            assert updated_individual.email_address == None
-            assert updated_individual.telephone == None
-            assert updated_individual.ssn == None
+        updated_individual = database.session.query(Individual).filter_by(mci_id=new_individual['mci_id']).first()
+        assert updated_individual.first_name == None
+        assert updated_individual.last_name == None
+        assert updated_individual.middle_name == None
+        assert updated_individual.date_of_birth == None
+        assert updated_individual.email_address == None
+        assert updated_individual.telephone == None
+        assert updated_individual.ssn == None
