@@ -123,7 +123,7 @@ def database():
     teardown_postgres_container()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def app_context():
     with app.app_context() as context:
         yield context
