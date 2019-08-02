@@ -12,3 +12,6 @@
 **/samples
 **/scripts
 **/*.sql
+
+# miscellaneous
+**/push.sh
