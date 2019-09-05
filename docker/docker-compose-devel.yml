@@ -1,25 +1,29 @@
 version: "3.5"
 services:
-    mci:
-        image: brighthive/master-client-index:1.0.0
-        ports:
-            - "8000:8000"
-        environment:
-            - APP_ENV=DEVELOPMENT
-            - POSTGRES_USER=brighthive
-            - POSTGRES_PASSWORD=test_password
-            - POSTGRES_DATABASE=mci_dev
-            - POSTGRES_HOSTNAME=postgres_mci
-            - POSTGRES_PORT=5432
-        depends_on:
-            - postgres_mci
-        networks:
-            - mci_network
+    # mci:
+    #     image: brighthive/master-client-index:1.0.0
+    #     ports:
+    #         - "8000:8000"
+    #     environment:
+    #         - APP_ENV=DEVELOPMENT
+    #         - POSTGRES_USER=brighthive
+    #         - POSTGRES_PASSWORD=test_password
+    #         - POSTGRES_DATABASE=mci_dev
+    #         - POSTGRES_HOSTNAME=postgres_mci
+    #         - POSTGRES_PORT=5432
+    #     depends_on:
+    #         - postgres_mci
+        # networks:
+        #     - mci_network
         # Enables https://blog.lucasferreira.org/howto/2017/06/03/running-pdb-with-docker-and-gunicorn.html
-        stdin_open: true 
-        tty: true
+        # stdin_open: true 
+        # tty: true
+    redis:
+        image: redis:latest
+        ports:
+            - "6379:6379"
     postgres_mci:
-        image: postgres:11.1
+        image: postgres:latest
         ports:
             - "5432:5432"
         environment:
@@ -36,9 +40,9 @@ services:
         # who owns the server process. That's a problem! Because the mci container
         # cannot connect to the database and run migrations.
         user: postgres
-        networks:
-            - mci_network
-# Provide a network for local development with the mci-matching-service.
-networks:
-    mci_network:
-        external: true
+#         networks:
+#             - mci_network
+# # Provide a network for local development with the mci-matching-service.
+# networks:
+#     mci_network:
+#         external: true
