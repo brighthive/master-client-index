@@ -16,6 +16,7 @@ brighthive-authlib = "*"
 requests = "*"
 gevent = "*"
 mci-database = {editable = true, ref = "master", git = "https://github.com/brighthive/mci-database.git"}
+redis = "*"
 
 [dev-packages]
 expects = "*"

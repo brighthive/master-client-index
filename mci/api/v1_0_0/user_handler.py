@@ -6,6 +6,7 @@ Handle user endpoint requests from the API.
 
 import json
 import os
+import redis
 from collections import OrderedDict
 from datetime import datetime
 
@@ -25,10 +26,12 @@ from mci_database.db.models import (Address, Disposition, EducationLevel,
 
 config = ConfigurationFactory.from_env()
 
+
 class UserHandler(object):
     """
     A class for handling all requests made to the users endpoint.
     """
+
     def create_user_blob(self, mci_id: str):
         """
         Creates an object with data of an existing user. 
@@ -170,11 +173,12 @@ class UserHandler(object):
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
             try:
-                response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
+                response = requests.post(
+                    matching_service_uri, data=new_user_json, timeout=5)
             except ConnectionError:
                 return {
                     'error': 'The matching service did not return a response.'
-                }, 400        
+                }, 400
             else:
                 return self._handle_match_response(response=response, new_user=new_user)
         else:
@@ -230,14 +234,14 @@ class UserHandler(object):
         json_payload = request.json
 
         try:
-            mci_id = json_payload['mci_id'] 
+            mci_id = json_payload['mci_id']
         except Exception:
             return {'message': 'Malformed or empty JSON object found. Please include JSON with an mci_id in the request body.'}, 400
-        
+
         comment = None
         if "comment" in json_payload.keys():
             comment = json_payload['comment']
-        
+
         user = self._get_user(mci_id)
 
         user.first_name = None
@@ -251,7 +255,7 @@ class UserHandler(object):
         user.mailing_address_id = None
         user.date_of_birth = None
         user.ssn = None
-        
+
         db.session.commit()
 
         pii_removal_data = {
@@ -261,11 +265,11 @@ class UserHandler(object):
         pii_removal = IndividualPIIRemoval(**pii_removal_data)
         db.session.add(pii_removal)
 
-        try: 
+        try:
             db.session.commit()
         except IntegrityError:
             return {"message": "Nothing to do. PII has already been removed for this individual"}, 200
-            
+
         return {"message": "Success! PII removed for individual with MCI ID {}".format(mci_id)}, 201
 
     # (Private) helper functions
@@ -273,7 +277,7 @@ class UserHandler(object):
         user_obj = Individual.query.filter_by(mci_id=mci_id).first()
         if not user_obj:
             raise IndividualDoesNotExist
-        
+
         return user_obj
 
     def _get_mailing_address(self, user: Individual):
@@ -563,9 +567,20 @@ class UserHandler(object):
             db.session.add(new_user)
             db.session.commit()
 
-            return {
+            user_obj = {
                 'mci_id': new_user.mci_id,
                 'vendor_id': new_user.vendor_id,
                 'first_name': new_user.first_name,
                 'last_name': new_user.last_name
-            }, 201
+            }
+            r = redis.StrictRedis(host='redis')
+            foo = r.publish('mci-users', json.dumps(user_obj))
+            print('Published..... {}'.format(foo))
+            
+            return user_obj, 201
+            # return {
+            #     'mci_id': new_user.mci_id,
+            #     'vendor_id': new_user.vendor_id,
+            #     'first_name': new_user.first_name,
+            #     'last_name': new_user.last_name
+            # }, 201

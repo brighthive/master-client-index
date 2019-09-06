@@ -5,7 +5,6 @@ WORKERS=4
 
 # The Pipfile specifes "editable = true" (otherwise, Pip does not install non-Python files).
 MIGRATION_PATH="/master-client-index/src/mci-database/mci_database/db/migrations"
-
 RETRIES=0
 until flask db upgrade -d $MIGRATION_PATH; do
     RETRIES=`expr $RETRIES + 1`
