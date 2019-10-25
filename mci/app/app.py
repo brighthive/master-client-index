@@ -11,6 +11,7 @@ from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 from mci.api import (AddressResource, DispositionResource,
                      EducationLevelResource, EmploymentStatusResource,
@@ -51,6 +52,7 @@ def handle_errors(e):
 def create_app():
     app = Flask(__name__)
     app.config.from_object(ConfigurationFactory.from_env())
+    CORS(app, resources={r"/health": {"origins": "*"}})
     db.init_app(app)
     migrate = Migrate(app, db)
     api = Api(app)
