@@ -52,7 +52,7 @@ def handle_errors(e):
 def create_app():
     app = Flask(__name__)
     app.config.from_object(ConfigurationFactory.from_env())
-    CORS(app)
+    CORS(app, resources={r"/health": {"origins": "*"}})
     db.init_app(app)
     migrate = Migrate(app, db)
     api = Api(app)
