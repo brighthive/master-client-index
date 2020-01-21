@@ -3,8 +3,11 @@ services:
     mci:
         image: brighthive/master-client-index:1.0.0
         ports:
-            - "8000:8000"
+            - "8001:8000"
+        volumes:
+            - '../mci:/master-client-index/mci'
         environment:
+            # - APP_ENV=SANDBOX
             - APP_ENV=DEVELOPMENT
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
