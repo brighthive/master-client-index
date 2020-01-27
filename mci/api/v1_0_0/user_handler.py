@@ -210,7 +210,6 @@ class UserHandler(object):
             links = build_links('users', offset, limit, row_count)
         else:
             links = []
-            status_code = 404
 
         response = OrderedDict()
         response['users'] = []
