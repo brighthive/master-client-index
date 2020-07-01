@@ -1,7 +1,7 @@
 version: '3'
 services:
     mci:
-        image: brighthive/master-client-index:1.0.0
+        image: brighthive/master-client-index:1.0.1
         ports:
             - "8001:8000"
         environment:
@@ -16,9 +16,11 @@ services:
     postgres_mci:
         image: postgres:11.1
         environment:
+            - APP_ENV=DEVELOPMENT
             - POSTGRES_USER=brighthive
             - POSTGRES_PASSWORD=test_password
             - POSTGRES_DB=mci_dev
+            - MATCHING_SERVICE_URI=http://localhost:8000/compute-match
         ports:
             - "5436:5432"
         # Spinning up postgres (when decoupled from the app)
@@ -31,3 +33,7 @@ services:
         # who owns the server process. That's a problem! Because the mci container
         # cannot connect to the database and run migrations.
         user: postgres
+    mci-matching-service:
+        image: 396527728813.dkr.ecr.us-east-2.amazonaws.com/brighthive/mci-matching-service:latest
+        ports:
+            - "8888:8000"

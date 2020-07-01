@@ -25,10 +25,12 @@ from mci_database.db.models import (Address, Disposition, EducationLevel,
 
 config = ConfigurationFactory.from_env()
 
+
 class UserHandler(object):
     """
     A class for handling all requests made to the users endpoint.
     """
+
     def create_user_blob(self, mci_id: str):
         """
         Creates an object with data of an existing user. 
@@ -92,7 +94,8 @@ class UserHandler(object):
             if validate_email(user['email_address']):
                 new_user.email_address = user['email_address']
             else:
-                errors.append('Invalid Email Address format.')
+                if len(user['email_address']) > 0:
+                    errors.append('Invalid Email Address format.')
         if 'telephone' in user.keys():
             new_user.telephone = user['telephone']
         if 'date_of_birth' in user.keys():
@@ -174,7 +177,7 @@ class UserHandler(object):
             except ConnectionError:
                 return {
                     'error': 'The matching service did not return a response.'
-                }, 400        
+                }, 400
             else:
                 return self._handle_match_response(response=response, new_user=new_user)
         else:
@@ -229,14 +232,14 @@ class UserHandler(object):
         json_payload = request.json
 
         try:
-            mci_id = json_payload['mci_id'] 
+            mci_id = json_payload['mci_id']
         except Exception:
             return {'message': 'Malformed or empty JSON object found. Please include JSON with an mci_id in the request body.'}, 400
-        
+
         comment = None
         if "comment" in json_payload.keys():
             comment = json_payload['comment']
-        
+
         user = self._get_user(mci_id)
 
         user.first_name = None
@@ -250,7 +253,7 @@ class UserHandler(object):
         user.mailing_address_id = None
         user.date_of_birth = None
         user.ssn = None
-        
+
         db.session.commit()
 
         pii_removal_data = {
@@ -260,11 +263,11 @@ class UserHandler(object):
         pii_removal = IndividualPIIRemoval(**pii_removal_data)
         db.session.add(pii_removal)
 
-        try: 
+        try:
             db.session.commit()
         except IntegrityError:
             return {"message": "Nothing to do. PII has already been removed for this individual"}, 200
-            
+
         return {"message": "Success! PII removed for individual with MCI ID {}".format(mci_id)}, 201
 
     # (Private) helper functions
@@ -272,7 +275,7 @@ class UserHandler(object):
         user_obj = Individual.query.filter_by(mci_id=mci_id).first()
         if not user_obj:
             raise IndividualDoesNotExist
-        
+
         return user_obj
 
     def _get_mailing_address(self, user: Individual):
