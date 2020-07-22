@@ -33,7 +33,7 @@ class UserHandler(object):
 
     def create_user_blob(self, mci_id: str):
         """
-        Creates an object with data of an existing user. 
+        Creates an object with data of an existing user.
         Called when GETing the `user` endpoint with an MCI ID.
 
         Args:
@@ -48,6 +48,7 @@ class UserHandler(object):
             'mci_id': user_obj.mci_id,
             'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
             'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
+            'vendor_creation_date': '' if user_obj.vendor_creation_date is None else datetime.strftime(user_obj.vendor_creation_date, '%Y-%m-%d'),
             # 'ssn': '' if user_obj.ssn is None else user_obj.ssn,
             'first_name': '' if user_obj.first_name is None else user_obj.first_name,
             'suffix': '' if user_obj.suffix is None else user_obj.suffix,
@@ -67,7 +68,7 @@ class UserHandler(object):
 
     def create_new_user(self, user_object):
         """
-        Creates a new user. 
+        Creates a new user.
         Called when POSTing to the `users` endpoint.
         """
         errors = []
@@ -169,6 +170,9 @@ class UserHandler(object):
                     else:
                         new_user.dispositions.append(disposition['object'])
 
+        if 'vendor_creation_date' in user.keys():
+            new_user.vendor_creation_date = user['vendor_creation_date']
+
         if len(errors) == 0:
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
@@ -186,7 +190,7 @@ class UserHandler(object):
             }, 400
 
     def get_all_users(self, offset=0, limit=20):
-        """ 
+        """
         Retrieve all users.
         Called when GETing the `users` endpoint.
 
