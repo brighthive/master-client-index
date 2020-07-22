@@ -1,7 +1,7 @@
 version: '3'
 services:
     mci:
-        image: brighthive/master-client-index:1.0.1
+        image: brighthive/master-client-index:latest
         ports:
             - "8001:8000"
         environment:
@@ -27,8 +27,8 @@ services:
         # assigns the db files to postgres.
         #
         # postgres_mci_1  | The files belonging to this database system will be owned by user "postgres".
-        # postgres_mci_1  | This user must also own the server process. 
-        # 
+        # postgres_mci_1  | This user must also own the server process.
+        #
         # Without a designated user, the container does not have an (unprivileged, i.e., not "root")
         # who owns the server process. That's a problem! Because the mci container
         # cannot connect to the database and run migrations.
