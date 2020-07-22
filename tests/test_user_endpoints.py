@@ -19,7 +19,7 @@ class TestMCIAPI(object):
         '''
         response = test_client.get('/users')
 
-        assert response.status_code == 404
+        assert response.status_code == 200
         assert response.json['users'] == []
     
     @mock.patch('brighthive_authlib.providers.AuthZeroProvider.validate_token', return_value=True)
