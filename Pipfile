@@ -8,14 +8,14 @@ pycodestyle = "*"
 "autopep8" = "*"
 flask = "*"
 flask-restful = "*"
-gunicorn = {extras = ["gevent"], version = "*"}
+gunicorn = {extras = ["gevent"],version = "*"}
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 "psycopg2-binary" = "*"
 brighthive-authlib = "*"
 requests = "*"
 gevent = "*"
-mci-database = {editable = true, ref = "master", git = "https://github.com/brighthive/mci-database.git"}
+mci-database = {editable = true,ref = "master",git = "https://github.com/brighthive/mci-database.git"}
 
 [dev-packages]
 expects = "*"
@@ -25,6 +25,7 @@ docker = "*"
 sphinx = "*"
 pytest-mock = "*"
 requests-mock = "*"
+mock = "*"
 
 [requires]
 python_version = "3.8"
