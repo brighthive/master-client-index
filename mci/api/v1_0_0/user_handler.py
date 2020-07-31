@@ -91,7 +91,7 @@ class UserHandler(object):
             new_user.middle_name = user['middle_name'].title()
         if 'last_name' in user.keys():
             new_user.last_name = user['last_name'].title()
-        if 'email_address' in user.keys():
+        if 'email_address' in user.keys() and user['email_address'] is not None:
             if validate_email(user['email_address']):
                 new_user.email_address = user['email_address']
             else:
