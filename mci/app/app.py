@@ -25,6 +25,35 @@ from mci.api.errors import IndividualDoesNotExist
 from mci.config import ConfigurationFactory
 from mci_database.db import db
 
+# logger configuration
+formatter = logging.Formatter(
+    fmt='[%(asctime)s] [%(levelname)s] %(message)s', datefmt="%a, %d %b %Y %H:%M:%S")
+
+try:
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    region_name = os.getenv('AWS_REGION_NAME')
+    logging.getLogger().setLevel(logging.INFO)
+    boto3_session = boto3.Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
+                                  region_name=region_name)
+    logger = logging.getLogger(__name__)
+    handler = watchtower.CloudWatchLogHandler(
+        boto3_session=boto3_session, log_group=os.getenv('AWS_LOG_GROUP'), stream_name=os.getenv('AWS_LOG_STREAM'))
+    formatter = logging.Formatter(
+        fmt='[%(asctime)s] [%(levelname)s] %(message)s', datefmt="%a, %d %b %Y %H:%M:%S")
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
+except Exception as e:
+    logging.getLogger().setLevel(logging.INFO)
+    logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    logger.warning(
+        f'Failed to configure CloudWatch due to the following error: {str(e)}')
+
 
 def handle_errors(e):
     if isinstance(e, OAuth2ProviderError):
@@ -50,6 +79,26 @@ def handle_errors(e):
             response = jsonify({'error': 'An unknown error occured'})
             response.status_code = 400
             return response
+
+
+def after_request(response):
+    info = {
+        'remote_addr': request.remote_addr,
+        'request_time': str(datetime.utcnow()),
+        'method': request.method,
+        'path': request.path,
+        'scheme': request.scheme.upper(),
+        'status_code': response.status_code,
+        'status': response.status,
+        'content_length': response.content_length,
+        'user_agent': str(request.user_agent),
+        'payload': response.json
+    }
+    if info['status_code'] >= 200 and info['status_code'] < 300:
+        logger.info(info)
+    else:
+        logger.error(info)
+    return response
 
 
 def create_app():
@@ -80,57 +129,28 @@ def create_app():
                      endpoint='education_ep')
 
     app.register_error_handler(Exception, handle_errors)
+    app.after_request(after_request)
 
-    # logger configuration
-    formatter = logging.Formatter(
-        fmt='[%(asctime)s] [%(levelname)s] %(message)s', datefmt="%a, %d %b %Y %H:%M:%S")
-
-    try:
-        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-        region_name = os.getenv('AWS_REGION_NAME')
-        logging.getLogger().setLevel(logging.INFO)
-        boto3_session = boto3.Session(aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
-                                      region_name=region_name)
-        logger = logging.getLogger(__name__)
-        handler = watchtower.CloudWatchLogHandler(
-            boto3_session=boto3_session, log_group=os.getenv('AWS_LOG_GROUP'), stream_name=os.getenv('AWS_LOG_STREAM'))
-        formatter = logging.Formatter(
-            fmt='[%(asctime)s] [%(levelname)s] %(message)s', datefmt="%a, %d %b %Y %H:%M:%S")
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.INFO)
-        logger.addHandler(handler)
-    except Exception as e:
-        logging.getLogger().setLevel(logging.INFO)
-        logger = logging.getLogger(__name__)
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.INFO)
-        logger.addHandler(handler)
-        logger.warning(
-            f'Failed to configure CloudWatch due to the following error: {str(e)}')
-
-    @app.after_request
-    def after_request(response):
-        info = {
-            'remote_addr': request.remote_addr,
-            'request_time': str(datetime.utcnow()),
-            'method': request.method,
-            'path': request.path,
-            'scheme': request.scheme.upper(),
-            'status_code': response.status_code,
-            'status': response.status,
-            'content_length': response.content_length,
-            'user_agent': str(request.user_agent),
-            'payload': {
-                'last_name': request.json['last_name'] if 'last_name' in request.json else '',
-                'gender_id': request.json['gender_id'] if 'gender_id' in request.json else ''
-            }
-        }
-        if info['status_code'] >= 200 and info['status_code'] < 300:
-            logger.info(info)
-        else:
-            logger.error(info)
-        return response
-
+    # @app.after_request
+    # def after_request(response):
+    #     info = {
+    #         'remote_addr': request.remote_addr,
+    #         'request_time': str(datetime.utcnow()),
+    #         'method': request.method,
+    #         'path': request.path,
+    #         'scheme': request.scheme.upper(),
+    #         'status_code': response.status_code,
+    #         'status': response.status,
+    #         'content_length': response.content_length,
+    #         'user_agent': str(request.user_agent),
+    #         'payload': {
+    #             'last_name': request.json['last_name'] if 'last_name' in request.json else '',
+    #             'gender_id': request.json['gender_id'] if 'gender_id' in request.json else ''
+    #         }
+    #     }
+    #     if info['status_code'] >= 200 and info['status_code'] < 300:
+    #         logger.info(info)
+    #     else:
+    #         logger.error(info)
+    #     return response
     return app
