@@ -16,6 +16,8 @@ brighthive-authlib = "*"
 requests = "*"
 gevent = "*"
 mci-database = {editable = true,ref = "master",git = "https://github.com/brighthive/mci-database.git"}
+watchtower = "*"
+boto3 = "*"
 
 [dev-packages]
 expects = "*"
