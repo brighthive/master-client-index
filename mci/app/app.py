@@ -115,7 +115,7 @@ def create_app():
     api.add_resource(UserRemovePIIResource, '/users/remove-pii',
                      endpoint='user_remove_pii_ep')
     # helper endpoints
-    api.add_resource(HealthCheckResource, '/health', endpoint='healthcheck_ep')
+    api.add_resource(HealthCheckResource, '/', endpoint='healthcheck_ep')
     api.add_resource(SourceResource, '/source', endpoint='sources_ep')
     api.add_resource(GenderResource, '/gender', endpoint='gender_ep')
     api.add_resource(AddressResource, '/address', endpoint='address_ep')
