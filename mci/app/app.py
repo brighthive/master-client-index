@@ -91,8 +91,7 @@ def after_request(response):
         'status_code': response.status_code,
         'status': response.status,
         'content_length': response.content_length,
-        'user_agent': str(request.user_agent),
-        'payload': response.json
+        'user_agent': str(request.user_agent)
     }
     if info['status_code'] >= 200 and info['status_code'] < 300:
         logger.info(info)
@@ -130,27 +129,4 @@ def create_app():
 
     app.register_error_handler(Exception, handle_errors)
     app.after_request(after_request)
-
-    # @app.after_request
-    # def after_request(response):
-    #     info = {
-    #         'remote_addr': request.remote_addr,
-    #         'request_time': str(datetime.utcnow()),
-    #         'method': request.method,
-    #         'path': request.path,
-    #         'scheme': request.scheme.upper(),
-    #         'status_code': response.status_code,
-    #         'status': response.status,
-    #         'content_length': response.content_length,
-    #         'user_agent': str(request.user_agent),
-    #         'payload': {
-    #             'last_name': request.json['last_name'] if 'last_name' in request.json else '',
-    #             'gender_id': request.json['gender_id'] if 'gender_id' in request.json else ''
-    #         }
-    #     }
-    #     if info['status_code'] >= 200 and info['status_code'] < 300:
-    #         logger.info(info)
-    #     else:
-    #         logger.error(info)
-    #     return response
     return app
