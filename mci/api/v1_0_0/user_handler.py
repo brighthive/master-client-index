@@ -177,7 +177,8 @@ class UserHandler(object):
             matching_service_uri = config.get_matching_service_uri()
             new_user_json = json.dumps(new_user.as_dict, default=str)
             try:
-                response = requests.post(matching_service_uri, data=new_user_json, timeout=5)
+                response = requests.post(
+                    matching_service_uri, data=new_user_json, timeout=5)
             except ConnectionError:
                 return {
                     'error': 'The matching service did not return a response.'
@@ -328,11 +329,32 @@ class UserHandler(object):
         }
 
         try:
-            new_address = Address(address.get('address', '').title(),
-                                  address.get('city', '').title(),
-                                  address.get('state', '').upper(),
-                                  address.get('postal_code', ''),
-                                  address.get('country', '').upper())
+            try:
+                _address = address.get('address', '').title()
+            except Exception:
+                _address = None
+
+            try:
+                _city = address.get('city', '').title()
+            except Exception:
+                _city = None
+
+            try:
+                _state = address.get('state', '').upper()
+            except Exception:
+                _state = None
+
+            try:
+                _postal_code = address.get('postal_code', '')
+            except Exception:
+                _postal_code = None
+
+            try:
+                _country = address.get('country', '').upper()
+            except Exception:
+                _country = None
+
+            new_address = Address(_address, _city, _state, _postal_code, _country)
 
             address = Address.query.filter_by(address=new_address.address, city=new_address.city,
                                               state=new_address.state, postal_code=new_address.postal_code,
@@ -344,7 +366,7 @@ class UserHandler(object):
                 db.session.add(new_address)
                 db.session.commit()
                 result['id'] = new_address.id
-        except Exception:
+        except Exception as e:
             result['error'] = 'Invalid Mailing Address format.'
 
         return result
