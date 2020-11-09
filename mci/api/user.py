@@ -122,7 +122,7 @@ class UserDetailResource(UserResource):
 class SecureUserDetailResource(UserResource):
     """ A specific user. """
 
-    # @token_required(Config.get_oauth2_provider(), scopes=['mci.secure-user-detail:get'])
+    @token_required(Config.get_oauth2_provider(), scopes=['mci.secure-user-detail:get'])
     def get(self, mci_id: str):
         return self.get_request_handler(request.headers).create_secure_user_blob(mci_id)
 

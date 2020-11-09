@@ -13,7 +13,6 @@ def post_new_individual(individual_data, test_client, headers):
                 json={"mci_id": "", "score": ""}, status_code=201)
 
         response = test_client.post('/users', data=json.dumps(individual_data), headers=headers)
-
         assert response.status_code == 201
         assert response.json['first_name'] == individual_data['first_name']
         assert response.json['last_name'] == individual_data['last_name']
