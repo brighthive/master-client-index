@@ -15,9 +15,9 @@ flask-migrate = "*"
 brighthive-authlib = "*"
 requests = "*"
 gevent = "*"
-mci-database = {editable = true,ref = "master",git = "https://github.com/brighthive/mci-database.git"}
 watchtower = "*"
 boto3 = "*"
+mci-database = {editable = true, git = "https://github.com/brighthive/mci-database.git", ref = "master"}
 
 [dev-packages]
 expects = "*"
