@@ -1,7 +1,8 @@
 version: '3'
 services:
     mci:
-        image: brighthive/master-client-index:1.0.5
+        # image: brighthive/master-client-index:1.0.5
+        image: brighthive/master-client-index:1.0.6
         ports:
             - "8001:8000"
         environment:

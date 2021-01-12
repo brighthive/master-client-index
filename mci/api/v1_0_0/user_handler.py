@@ -66,6 +66,41 @@ class UserHandler(object):
         }
         return user, 200
 
+    def create_secure_user_blob(self, mci_id: str):
+        """
+        Creates an object with data of an existing user.
+        Called when GETing the `user` endpoint with an MCI ID.
+
+        Args:
+            mci_id (str): The MCI ID to query for.
+
+        Return:
+            dict, int: An object representing the specified user and the associated error code.
+        """
+        user_obj = self._get_user(mci_id)
+
+        user = {
+            'mci_id': user_obj.mci_id,
+            'vendor_id': '' if user_obj.vendor_id is None else user_obj.vendor_id,
+            'registration_date': '' if user_obj.registration_date is None else datetime.strftime(user_obj.registration_date, '%Y-%m-%d'),
+            'vendor_creation_date': '' if user_obj.vendor_creation_date is None else datetime.strftime(user_obj.vendor_creation_date, '%Y-%m-%d'),
+            'ssn': '' if user_obj.ssn is None else user_obj.ssn,
+            'first_name': '' if user_obj.first_name is None else user_obj.first_name,
+            'suffix': '' if user_obj.suffix is None else user_obj.suffix,
+            'last_name': '' if user_obj.last_name is None else user_obj.last_name,
+            'middle_name': '' if user_obj.middle_name is None else user_obj.middle_name,
+            'mailing_address': self._get_mailing_address(user_obj),
+            'date_of_birth': '' if user_obj.date_of_birth is None else str(user_obj.date_of_birth),
+            'email_address': '' if user_obj.email_address is None else user_obj.email_address,
+            'telephone': '' if user_obj.telephone is None else user_obj.telephone,
+            'gender': self._find_gender_type(user_obj),
+            'ethnicity_race': self._find_user_ethnicity(user_obj),
+            'education_level': '',
+            'employment_status': self._find_employment_status_type(user_obj),
+            'source': self._find_source_type(user_obj)
+        }
+        return user, 200
+
     def create_new_user(self, user_object):
         """
         Creates a new user.
@@ -298,6 +333,7 @@ class UserHandler(object):
             'city': '',
             'state': '',
             'postal_code': '',
+            'county': '',
             'country': ''
         }
 
@@ -309,6 +345,7 @@ class UserHandler(object):
                 mailing_address['city'] = '' if address.city is None else address.city
                 mailing_address['state'] = '' if address.state is None else address.state
                 mailing_address['postal_code'] = '' if address.postal_code is None else address.postal_code
+                mailing_address['county'] = '' if address.county is None else address.county
                 mailing_address['country'] = '' if address.country is None else address.country
 
         return mailing_address
@@ -350,14 +387,21 @@ class UserHandler(object):
                 _postal_code = None
 
             try:
+                _county = address.get('county')
+            except Exception:
+                _county = None
+
+            try:
                 _country = address.get('country', '').upper()
             except Exception:
                 _country = None
 
-            new_address = Address(_address, _city, _state, _postal_code, _country)
+            new_address = Address(_address, _city, _state,
+                                  _postal_code, _county, _country)
 
             address = Address.query.filter_by(address=new_address.address, city=new_address.city,
                                               state=new_address.state, postal_code=new_address.postal_code,
+                                              county=new_address.county,
                                               country=new_address.country).first()
             if address is not None:
                 result['id'] = address.id

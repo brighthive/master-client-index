@@ -20,7 +20,7 @@ from mci.api import (AddressResource, DispositionResource,
                      EducationLevelResource, EmploymentStatusResource,
                      EthnicityRaceResource, GenderResource,
                      HealthCheckResource, SourceResource, UserDetailResource,
-                     UserResource, UserRemovePIIResource)
+                     UserResource, SecureUserDetailResource, UserRemovePIIResource)
 from mci.api.errors import IndividualDoesNotExist
 from mci.config import ConfigurationFactory
 from mci_database.db import db
@@ -111,6 +111,8 @@ def create_app():
     api.add_resource(UserResource, '/users', endpoint='users_ep')
     api.add_resource(UserDetailResource, '/users/<mci_id>',
                      endpoint='user_detail_ep')
+    api.add_resource(SecureUserDetailResource,
+                     '/user-details/<mci_id>', endpoint='secure_user_detail_ep')
     api.add_resource(UserRemovePIIResource, '/users/remove-pii',
                      endpoint='user_remove_pii_ep')
     # helper endpoints
